@@ -167,7 +167,7 @@ def NaverDownload():
 
 def DaumGetImgURL(productId):
     global headers
-    result = requests.post("http://webtoon.daum.net/data/pc/webtoon/viewer_images/"+productId, 
+    result = requests.get("http://webtoon.daum.net/data/pc/webtoon/viewer_images/"+productId, 
         headers=headers
     ).text
     output = []
@@ -187,6 +187,7 @@ def DaumGetTitlesURL(Id):
         imgs = json.loads(result).get("data").get("webtoon").get("webtoonEpisodes")
         for i in imgs:
             output.append(i["id"])
+    output.sort()
     return output
 
 def DaumDownload():
@@ -203,13 +204,16 @@ def DaumDownload():
     for i in range(int(Start.get()), int(End.get())+1):
         c=1 #for counting
 
-        if not os.path.isdir(os.path.join(Path, Id.get(), str(i))):
-            os.mkdir(os.path.join(Path, Id.get(), str(i)))
         try:
             response = DaumGetImgURL(str(ids[i-1]))
         except:
             Result.set("Error - Wrong Webtoon Id")
             return 
+        if response == []:
+            Result.set("Error - Can't get images")
+            return 
+        if not os.path.isdir(os.path.join(Path, Id.get(), str(i))):
+            os.mkdir(os.path.join(Path, Id.get(), str(i)))
         for anchor in response:
             img_data = requests.get(str(anchor), headers=headers).content
             with open(f'{Path}\\{Id.get()}\\{i}\\{c}.jpg', 'wb') as handler:
@@ -289,7 +293,7 @@ def DownloadWebtoon():
         Result.set("Error - invalid webtoon type")
 
 def showVersion():
-    messagebox.showinfo("Version", "1.2.0")
+    messagebox.showinfo("Version", "1.2.1")
 
 menubar = tkinter.Menu(window)
 
