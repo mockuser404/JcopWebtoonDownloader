@@ -102,15 +102,17 @@ def KakaoDownload():
         
         for i in range(int(Start.get()), int(End.get())+1):
             c=1 #for counting
-
-            if not os.path.isdir(os.path.join(Path, Id.get(), str(i))):
-                os.mkdir(os.path.join(Path, Id.get(), str(i)))
             
             try:
                 response = KakaoGetImgURL(str(ids[i-1]))
             except:
                 Result.set("Error - Wrong Webtoon Id")
                 return 
+            if response == []:
+                Result.set("Error - Can't get images")
+                return 
+            if not os.path.isdir(os.path.join(Path, Id.get(), str(i))):
+                os.mkdir(os.path.join(Path, Id.get(), str(i)))
             for anchor in response:
                 img_data = requests.get("http://page-edge-jz.kakao.com/sdownload/resource/"+anchor, headers=headers,cookies = cookie).content
                 with open(f'{Path}\\{Id.get()}\\{i}\\{c}.jpg', 'wb') as handler:
@@ -124,8 +126,8 @@ def KakaoDownload():
                 content += "</body></center></html>"
                 htmlFile.write(content)
             
-    except:
-        Result.set("Error")
+    except Exception as e: 
+        Result.set(e)
     else:
         Result.set("Successfully download")
 
@@ -139,14 +141,15 @@ def NaverDownload():
         os.mkdir(os.path.join(Path, Id.get()))
     try:
         for i in range(int(Start.get()),int(End.get())+1):
-            #make path of file 
-            if not os.path.isdir(os.path.join(Path, Id.get(), str(i))):
-                os.mkdir(os.path.join(Path, Id.get(), str(i)))
-
             c=1 #for counting
 
             response = requests.get(f'https://comic.naver.com/webtoon/detail.nhn?titleId={Id.get()}&no={i}', cookies = cookie).text
             soup = BeautifulSoup(response, 'html.parser')
+            if soup.select('.wt_viewer img') == []:
+                Result.set("Error - Can't get images")
+                return 
+            if not os.path.isdir(os.path.join(Path, Id.get(), str(i))):
+                os.mkdir(os.path.join(Path, Id.get(), str(i)))
             for anchor in soup.select('.wt_viewer img'):
                 url = anchor.get('src', '/')
                 img_data = requests.get(url, headers=headers).content
@@ -160,8 +163,8 @@ def NaverDownload():
                     content += f"<img src='{j}.jpg'><br>"
                 content += "</body></center></html>"
                 htmlFile.write(content)
-    except:
-        Result.set("Error")
+    except Exception as e: 
+        Result.set(e)
     else:
         Result.set("Successfully download")    
 
@@ -200,33 +203,36 @@ def DaumDownload():
         os.mkdir(os.path.join(Path, Id.get()))
 
     ids = DaumGetTitlesURL(Id.get())
-    
-    for i in range(int(Start.get()), int(End.get())+1):
-        c=1 #for counting
+    try:
+        for i in range(int(Start.get()), int(End.get())+1):
+            c=1 #for counting
 
-        try:
-            response = DaumGetImgURL(str(ids[i-1]))
-        except:
-            Result.set("Error - Wrong Webtoon Id")
-            return 
-        if response == []:
-            Result.set("Error - Can't get images")
-            return 
-        if not os.path.isdir(os.path.join(Path, Id.get(), str(i))):
-            os.mkdir(os.path.join(Path, Id.get(), str(i)))
-        for anchor in response:
-            img_data = requests.get(str(anchor), headers=headers).content
-            with open(f'{Path}\\{Id.get()}\\{i}\\{c}.jpg', 'wb') as handler:
-                c+=1
-                handler.write(img_data)
-            
-        with open(f"{Path}\\{Id.get()}\\{i}\\{i}.html","w") as htmlFile:
-            content = "<html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><style>body, html{margin: 0;border: 0;padding: 0;}@media only screen and (max-width: 700px) {img {width: 100%;}}</style><title>Episode "+str(i)+" ("+str(Id.get())+")</title></head><body><center>"
-            for j in range(1,c):
-                content += f"<img src='{j}.jpg'><br>"
-            content += "</body></center></html>"
-            htmlFile.write(content)
-    Result.set("Successfully download")
+            try:
+                response = DaumGetImgURL(str(ids[i-1]))
+            except:
+                Result.set("Error - Wrong Webtoon Id")
+                return 
+            if response == []:
+                Result.set("Error - Can't get images")
+                return 
+            if not os.path.isdir(os.path.join(Path, Id.get(), str(i))):
+                os.mkdir(os.path.join(Path, Id.get(), str(i)))
+            for anchor in response:
+                img_data = requests.get(str(anchor), headers=headers).content
+                with open(f'{Path}\\{Id.get()}\\{i}\\{c}.jpg', 'wb') as handler:
+                    c+=1
+                    handler.write(img_data)
+                
+            with open(f"{Path}\\{Id.get()}\\{i}\\{i}.html","w") as htmlFile:
+                content = "<html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><style>body, html{margin: 0;border: 0;padding: 0;}@media only screen and (max-width: 700px) {img {width: 100%;}}</style><title>Episode "+str(i)+" ("+str(Id.get())+")</title></head><body><center>"
+                for j in range(1,c):
+                    content += f"<img src='{j}.jpg'><br>"
+                content += "</body></center></html>"
+                htmlFile.write(content)
+    except Exception as e: 
+        Result.set(e)
+    else:
+        Result.set("Successfully download")
 
 def LezhinDownload():
     global headers, Path, cookie
@@ -238,10 +244,6 @@ def LezhinDownload():
         os.mkdir(os.path.join(Path, Id.get()))
     try:
         for i in range(int(Start.get()),int(End.get())+1):
-            #make path of file 
-            if not os.path.isdir(os.path.join(Path, Id.get(), str(i))):
-                os.mkdir(os.path.join(Path, Id.get(), str(i)))
-
             c=1 #for counting
 
             try:
@@ -249,6 +251,11 @@ def LezhinDownload():
             except:
                 Result.set("Error - Wrong Webtoon Id")
                 return 
+            if response == []:
+                Result.set("Error - Can't get images")
+                return 
+            if not os.path.isdir(os.path.join(Path, Id.get(), str(i))):
+                os.mkdir(os.path.join(Path, Id.get(), str(i)))
             for anchor in response:
                 img_data = requests.get("https://cdn.lezhin.com/v2/"+anchor["path"], headers=headers, cookies = cookie).content
                 with open(f'{Path}\\{Id.get()}\\{i}\\{c}.jpg', 'wb') as handler:
@@ -262,8 +269,8 @@ def LezhinDownload():
                 content += "</body></center></html>"
                 htmlFile.write(content)
             
-    except:
-        Result.set("Error")
+    except Exception as e: 
+        Result.set(e)
     else:
         Result.set("Successfully download")
 
@@ -275,10 +282,13 @@ def readCookie():
     global cookie
     filename = filedialog.askopenfilename() 
     if filename != "":
-        f = open(filename, "r")
-        data=f.read()
-        f.close()
-        cookie = json.loads(data)
+        try:
+            f = open(filename, "r")
+            data=f.read()
+            f.close()
+            cookie = json.loads(data)
+        except:
+            Result.set("Error - Can't read the cookie data")
 
 def DownloadWebtoon():
     if TypeOfWebtoon.get() == "Kakao Page":
@@ -293,7 +303,7 @@ def DownloadWebtoon():
         Result.set("Error - invalid webtoon type")
 
 def showVersion():
-    messagebox.showinfo("Version", "1.2.1")
+    messagebox.showinfo("Version", "1.2.2")
 
 menubar = tkinter.Menu(window)
 
