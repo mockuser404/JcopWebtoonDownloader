@@ -38,7 +38,7 @@ class MainWindow(QMainWindow, WebtoonDownload):
         self.ui.pushButton_download.clicked.connect(self.download)
         self.ui.pushButton_open.clicked.connect(self.openDir)
         self.ui.menuSetting.triggered[QAction].connect(self.readCookie)
-        self.ui.menuVersion.triggered[QAction].connect(lambda: self.showVersionMessage("1.4.1"))
+        self.ui.menuVersion.triggered[QAction].connect(lambda: self.showVersionMessage("1.4.2"))
 
         # Show Main
         self.show()

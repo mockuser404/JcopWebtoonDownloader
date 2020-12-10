@@ -26,11 +26,12 @@ def bar():
         progress['value'] = 20
         root.update_idletasks() 
 
-        version =  open("version.txt", "w+")
+        version =  open("version.txt", "r")
         progress['value'] = 30
         root.update_idletasks() 
     
-        if releases["tag_name"] != version.readline():
+        if releases["tag_name"] != version.read():
+            version.close()
             for i in releases["assets"]:
                 if i["name"] == "jcop-webtoon-downloader.exe":
                     os.remove("jcop-webtoon-downloader.exe")
@@ -40,15 +41,15 @@ def bar():
                     wget.download(i["browser_download_url"],"jcop-webtoon-downloader.exe")
                     progress['value'] = 90
                     root.update_idletasks() 
-
-            version.write(releases["tag_name"])
-            version.close()
+            edit_version =  open("version.txt", "w")
+            edit_version.write(releases["tag_name"])
+            edit_version.close()
             progress['value'] = 100
             mb.showinfo('Info', 'Your downloader installed successfully')
             root.update_idletasks() 
         
         else:
-            mb.showinfo("You are currently using last version")
+            mb.showinfo("Info", "You are currently using last version")
             progress['value'] = 100
             root.update_idletasks() 
 

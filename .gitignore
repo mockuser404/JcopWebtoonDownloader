@@ -4,4 +4,4 @@ dist
 etc
 naver
 Output
-jcop-webtoon-downloader.spec
+*.spec
