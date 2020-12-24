@@ -1,15 +1,15 @@
 ################################################################################
 ##
-## BY: WANDERSON M.PIMENTA
+## BY: Inpyo Lee
 ## PROJECT MADE WITH: Qt Designer and PySide2
-## V: 1.0.0
+## V: 2.1.1
 ##
 ################################################################################
 
 import sys
 import os
-import platform
-from PySide2 import QtCore, QtGui, QtWidgets
+import subprocess
+import json
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
@@ -18,9 +18,13 @@ from PySide2.QtWidgets import *
 from ui_main import Ui_MainWindow
 
 # IMPORT FUNCTIONS
-from download_functions import *
+from download_func import *
+from cookie_saving import * 
+import search_func 
 
-class MainWindow(QMainWindow, WebtoonDownload):
+
+version = "2.1.1"
+class MainWindow(QMainWindow, WebtoonDownload, SavingCookie):
     def __init__(self):
 
         # Main Setup
@@ -36,18 +40,34 @@ class MainWindow(QMainWindow, WebtoonDownload):
 
         # Add function in buttons
         self.ui.pushButton_download.clicked.connect(self.download)
-        self.ui.pushButton_open.clicked.connect(self.openDir)
-        self.ui.menuSetting.triggered[QAction].connect(self.readCookie)
-        self.ui.menuVersion.triggered[QAction].connect(lambda: self.showVersionMessage("1.4.2"))
+        self.ui.pushButton_Search.clicked.connect(self.search)
+        self.ui.actionNaver_Comic.triggered.connect(self.genNaverComicCookieData)
+        self.ui.actionKakao_Page.triggered.connect(self.genKakaoPageCookieData)
+        self.ui.actionLezhin_Comics.triggered.connect(self.genLezhinComicsCookieData)
+        self.ui.actionDefault_Directory.triggered.connect(self.defaultDirectory)
+        self.ui.actionOpen_Download_Folder.triggered.connect(self.openDownloadDir)
+        self.ui.actionVersion.triggered.connect(lambda: self.showVersionMessage(version))
+        self.ui.actionVisit_Blog_3.triggered.connect(lambda: subprocess.call(["rundll32", "url.dll,FileProtocolHandler", "https://blog.naver.com/the3countrys/222106929101"]))
 
         # Show Main
         self.show()
 
         self.isApplicationLastVersion()
+        self.loadCookie()
 
+    
+    def defaultDirectory(self):
+        fname = QFileDialog.getExistingDirectory(self, dir=self.data["cookie"]["defaultDirectory"])
+        if fname != "":
+            with open("data.json", "w") as f:
+                normal_data = self.data['cookie']
+                normal_data["defaultDirectory"] = fname
+                f.write(json.dumps(normal_data))
+                f.close()
+        
     def isApplicationLastVersion(self):
         try:
-            releases = json.loads(requests.get("https://api.github.com/repos/mynameispyo/JcopWebtoonDownloader/releases/latest").text)
+            releases = json.loads(requests.get("https://api.github.com/repos/mynameispyo/JcopWebtoonDownloader/releases/latest",timeout=5).text)
             version =  open("version.txt", "r+")
             if releases["tag_name"] != version.readline():
                 self.noticeUpdatesAvaliable()
@@ -67,18 +87,49 @@ class MainWindow(QMainWindow, WebtoonDownload):
             sys.exit()
     
     def download(self):
-        self.getInputs()
-        if self.data['Type'] == "Kakao Page":
-            WebtoonDownload.KakaoDownload(self)
-        elif self.data['Type'] == "Naver Comic":
-            WebtoonDownload.NaverDownload(self)
-        elif self.data['Type'] == "Daum Webtoon":
-            WebtoonDownload.DaumDownload(self)
-        elif self.data['Type'] == "Lezhin Comics":
-            WebtoonDownload.LezhinDownload(self)
-        else:
-            self.showWarningMessage("Invalid webtoon type")
-    
+        try:
+            self.loadCookie()
+            self.getInputs()
+            if self.data['Type'] == "Kakao Page":
+                WebtoonDownload.KakaoDownload(self)
+            elif self.data['Type'] == "Naver Comic":
+                WebtoonDownload.NaverDownload(self)
+            elif self.data['Type'] == "Daum Webtoon":
+                WebtoonDownload.DaumDownload(self)
+            elif self.data['Type'] == "Lezhin Comics":
+                WebtoonDownload.LezhinDownload(self)
+            else:
+                self.showWarningMessage("Invalid webtoon type")
+        except Exception as e: 
+            self.showErrorMessage(str(e))
+
+    def search(self):
+        try:
+            self.getInputs()
+            if self.data['Type'] == "Kakao Page":
+                if search_func.searchKakaoId(self.data['Id']) != None:
+                    self.ui.lineEdit_id.setText(search_func.searchKakaoId(self.data['Id']))
+                else:
+                    self.showWarningMessage("No results found for "+self.data['Id'])
+            elif self.data['Type'] == "Naver Comic":
+                if search_func.searchNaverId(self.data['Id']) != None:
+                    self.ui.lineEdit_id.setText(search_func.searchNaverId(self.data['Id']))
+                else:
+                    self.showWarningMessage("No results found for "+self.data['Id'])
+            elif self.data['Type'] == "Daum Webtoon":
+                if search_func.searchDaumId(self.data['Id']) != None:
+                    self.ui.lineEdit_id.setText(search_func.searchDaumId(self.data['Id']))
+                else:
+                    self.showWarningMessage("No results found for "+self.data['Id'])
+            elif self.data['Type'] == "Lezhin Comics":
+                if search_func.searchLezhinId(self.data['Id']) != None:
+                    self.ui.lineEdit_id.setText(search_func.searchLezhinId(self.data['Id']))
+                else:
+                    self.showWarningMessage("No results found for "+self.data['Id'])
+            else:
+                self.showWarningMessage("Invalid webtoon type")
+        except Exception as e: 
+            self.showErrorMessage(str(e))
 
     def getInputs(self):
         self.data['Type'] = self.ui.comboBox_webtoon_type.currentText()
@@ -86,16 +137,11 @@ class MainWindow(QMainWindow, WebtoonDownload):
         self.data['Start'] = self.ui.lineEdit_start.text()
         self.data['End'] = self.ui.lineEdit_end.text()
         self.data['DeviceId'] = self.ui.lineEdit_deviceid.text()
-        self.data['Directory'] = self.ui.lineEdit_directory.text()
 
 
     def isInputEmtpy(self):
         if self.data['Id'] == "":
             self.showWarningMessage("No input 'Id'")
-            return True
-
-        elif self.data['Directory'] == "":
-            self.showWarningMessage("No input 'Directory'")
             return True
 
         elif self.data['Start'] == "":
@@ -141,21 +187,9 @@ class MainWindow(QMainWindow, WebtoonDownload):
         msg.setWindowTitle("Information")
         msg.exec_()
 
-    def readCookie(self):
-        filename = QFileDialog.getOpenFileName(self, 'Open file', '',"Text files (*.txt)")
-        filename = filename[0]
-        if filename != "":
-            try:
-                f = open(filename, "r")
-                data=f.read()
-                f.close()
-                self.data["cookie"] = json.loads(data)
-            except:
-                self.showErrorMessage("Can't read the cookie data")
-                
-    def openDir(self):
-        fname = QFileDialog.getExistingDirectory(self)
-        self.ui.lineEdit_directory.setText(str(fname))
+    
+    def openDownloadDir(self):
+        subprocess.call(["rundll32", "url.dll,FileProtocolHandler", self.data["cookie"]["defaultDirectory"]])
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

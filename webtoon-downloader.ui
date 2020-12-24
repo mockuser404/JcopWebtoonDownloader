@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>342</width>
-    <height>241</height>
+    <width>341</width>
+    <height>211</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <x>20</x>
       <y>10</y>
       <width>301</width>
-      <height>152</height>
+      <height>155</height>
      </rect>
     </property>
     <layout class="QFormLayout" name="formLayout_2">
@@ -132,43 +132,6 @@
      <item row="3" column="1">
       <widget class="QLineEdit" name="lineEdit_deviceid"/>
      </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_6">
-       <property name="font">
-        <font>
-         <family>Arial</family>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Directory</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <item>
-        <widget class="QLineEdit" name="lineEdit_directory">
-         <property name="frame">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_open">
-         <property name="font">
-          <font>
-           <family>Arial</family>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Open</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
      <item row="1" column="1">
       <widget class="QLineEdit" name="lineEdit_id"/>
      </item>
@@ -181,7 +144,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>170</y>
+      <y>140</y>
       <width>301</width>
       <height>31</height>
      </rect>
@@ -202,46 +165,15 @@
      <string>Download</string>
     </property>
    </widget>
-   <widget class="QProgressBar" name="progressBar">
-    <property name="geometry">
-     <rect>
-      <x>25</x>
-      <y>175</y>
-      <width>191</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="cursor">
-     <cursorShape>WaitCursor</cursorShape>
-    </property>
-    <property name="value">
-     <number>24</number>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton">
-    <property name="geometry">
-     <rect>
-      <x>205</x>
-      <y>175</y>
-      <width>111</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Cancel</string>
-    </property>
-   </widget>
    <zorder>pushButton_download</zorder>
    <zorder>formLayoutWidget</zorder>
-   <zorder>progressBar</zorder>
-   <zorder>pushButton</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>342</width>
+     <width>341</width>
      <height>21</height>
     </rect>
    </property>
@@ -249,15 +181,32 @@
     <property name="title">
      <string>Setting</string>
     </property>
-    <addaction name="actionRead_Cookie_Data"/>
+    <widget class="QMenu" name="menuGenerate_Cookie_Data">
+     <property name="title">
+      <string>Generate Cookie Data</string>
+     </property>
+     <addaction name="actionNaver_Comic"/>
+     <addaction name="actionKakao_Page"/>
+     <addaction name="actionLezhin_Comics"/>
+    </widget>
+    <addaction name="menuGenerate_Cookie_Data"/>
+    <addaction name="actionDefault_Directory"/>
    </widget>
    <widget class="QMenu" name="menuVersion">
     <property name="title">
      <string>About</string>
     </property>
     <addaction name="actionVersion"/>
+    <addaction name="actionVisit_Blog_3"/>
+   </widget>
+   <widget class="QMenu" name="menuTool">
+    <property name="title">
+     <string>Tool</string>
+    </property>
+    <addaction name="actionOpen_Download_Folder"/>
    </widget>
    <addaction name="menuSetting"/>
+   <addaction name="menuTool"/>
    <addaction name="menuVersion"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -269,6 +218,61 @@
   <action name="actionVersion">
    <property name="text">
     <string>Version</string>
+   </property>
+  </action>
+  <action name="actionNaver_Comic">
+   <property name="text">
+    <string>Naver Comic</string>
+   </property>
+  </action>
+  <action name="actionKakao_Page">
+   <property name="text">
+    <string>Kakao Page</string>
+   </property>
+  </action>
+  <action name="actionLezhin_Comics">
+   <property name="text">
+    <string>Lezhin Comics</string>
+   </property>
+  </action>
+  <action name="actionDaum_Webtoon">
+   <property name="text">
+    <string>Daum Webtoon</string>
+   </property>
+  </action>
+  <action name="actionVisit_Blog">
+   <property name="text">
+    <string>Visit Blog</string>
+   </property>
+  </action>
+  <action name="actionVisit_Blog_2">
+   <property name="text">
+    <string>Visit Blog</string>
+   </property>
+  </action>
+  <action name="actionDefault_Directory">
+   <property name="text">
+    <string>Default Directory</string>
+   </property>
+  </action>
+  <action name="actionFolder_Type">
+   <property name="text">
+    <string>Folder Type</string>
+   </property>
+  </action>
+  <action name="actionRead_Cookie_Data_v1_4">
+   <property name="text">
+    <string>Read Cookie Data (v1.4)</string>
+   </property>
+  </action>
+  <action name="actionVisit_Blog_3">
+   <property name="text">
+    <string>Visit Blog</string>
+   </property>
+  </action>
+  <action name="actionOpen_Download_Folder">
+   <property name="text">
+    <string>Open Download Folder</string>
    </property>
   </action>
  </widget>

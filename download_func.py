@@ -15,7 +15,7 @@ class WebtoonDownload:
             "productId":productId,
             "deviceId": self.data['DeviceId']
             },
-            cookies = self.data['cookie'],
+            cookies = self.data['cookie'].get("kakao"),
             headers=self.data['headers']
         ).text
         output = []
@@ -47,7 +47,7 @@ class WebtoonDownload:
         return output
     
     def KakaoDownload(self):
-        path = self.data['Directory']
+        path = self.data["cookie"]["defaultDirectory"]
         id = self.data['Id']
         start = self.data['Start']
         end = self.data['End']
@@ -65,15 +65,15 @@ class WebtoonDownload:
                 try:
                     response = self.KakaoGetImgURL(str(ids[i-1]))
                 except:
-                    self.showErrorMessage("Wrong Webtoon Id")
+                    self.showWarningMessage("Wrong Webtoon Id")
                     return 
                 if response == []:
-                    self.showErrorMessage("Can't find images")
+                    self.showWarningMessage("Can't find images")
                     return 
                 if not os.path.isdir(os.path.join(path, id, str(i))):
                     os.mkdir(os.path.join(path, id, str(i)))
                 for anchor in response:
-                    img_data = requests.get("http://page-edge-jz.kakao.com/sdownload/resource/"+anchor, headers=self.data['headers'],cookies = self.data['cookie']).content
+                    img_data = requests.get("http://page-edge-jz.kakao.com/sdownload/resource/"+anchor, headers=self.data['headers'],cookies = self.data['cookie'].get("kakao")).content
                     with open(f'{path}\\{id}\\{i}\\{c}.jpg', 'wb') as handler:
                         c+=1
                         handler.write(img_data)
@@ -91,7 +91,7 @@ class WebtoonDownload:
             self.showInfoMessage("Successfully download")
 
     def NaverDownload(self):
-        path = self.data['Directory']
+        path = self.data["cookie"]["defaultDirectory"]
         id = self.data['Id']
         start = self.data['Start']
         end = self.data['End']
@@ -108,10 +108,10 @@ class WebtoonDownload:
             for i in range(int(start),int(end)+1):
                 c=1 #for counting
 
-                response = requests.get(f'https://comic.naver.com/webtoon/detail.nhn?titleId={id}&no={i}', cookies = self.data['cookie']).text
+                response = requests.get(f'https://comic.naver.com/webtoon/detail.nhn?titleId={id}&no={i}', cookies = self.data['cookie'].get("naver")).text
                 soup = BeautifulSoup(response, 'html.parser')
                 if soup.select('.wt_viewer img') == []:
-                    self.showErrorMessage("Can't find images")
+                    self.showWarningMessage("Can't find images")
                     return 
                 if not os.path.isdir(os.path.join(path, id, str(i))):
                     os.mkdir(os.path.join(path, id, str(i)))
@@ -157,7 +157,7 @@ class WebtoonDownload:
         return output
 
     def DaumDownload(self):
-        path = self.data['Directory']
+        path = self.data["cookie"]["defaultDirectory"]
         id = self.data['Id']
         start = self.data['Start']
         end = self.data['End']
@@ -175,10 +175,10 @@ class WebtoonDownload:
                 try:
                     response = self.DaumGetImgURL(str(ids[i-1]))
                 except:
-                    self.showErrorMessage("Wrong Webtoon Id")
+                    self.showWarningMessage("Wrong Webtoon Id")
                     return 
                 if response == []:
-                    self.showErrorMessage("Can't find images")
+                    self.showWarningMessage("Can't find images")
                     return 
                 if not os.path.isdir(os.path.join(path, id, str(i))):
                     os.mkdir(os.path.join(path, id, str(i)))
@@ -200,7 +200,7 @@ class WebtoonDownload:
             self.showInfoMessage("Successfully download")
 
     def LezhinDownload(self):
-        path = self.data['Directory']
+        path = self.data["cookie"]["defaultDirectory"]
         id = self.data['Id']
         start = self.data['Start']
         end = self.data['End']
@@ -214,17 +214,17 @@ class WebtoonDownload:
                 c=1 #for counting
 
                 try:
-                    response = json.loads(requests.get(f'https://www.lezhin.com/api/v2/inventory_groups/comic_viewer_k?alias={id}&name={i}&type=comic_episode', cookies = self.data['cookie']).text)["data"]["extra"]["episode"]["scrollsInfo"]
+                    response = json.loads(requests.get(f'https://www.lezhin.com/api/v2/inventory_groups/comic_viewer_k?alias={id}&name={i}&type=comic_episode', cookies = self.data['cookie'].get("lezhin")).text)["data"]["extra"]["episode"]["scrollsInfo"]
                 except:
-                    self.showErrorMessage("Wrong Webtoon Id")
+                    self.showWarningMessage("Wrong Webtoon Id")
                     return 
                 if response == []:
-                    self.showErrorMessage("Can't find images")
+                    self.showWarningMessage("Can't find images")
                     return 
                 if not os.path.isdir(os.path.join(path, id, str(i))):
                     os.mkdir(os.path.join(path, id, str(i)))
                 for anchor in response:
-                    img_data = requests.get("https://cdn.lezhin.com/v2/"+anchor["path"]+"?access_token="+str(self.data['cookie'].get("access_token")), headers=self.data['headers'], cookies = self.data['cookie']).content
+                    img_data = requests.get("https://cdn.lezhin.com/v2/"+anchor["path"]+"?access_token="+str(self.data['cookie'].get("lezhin").get("access_token")), headers=self.data['headers'], cookies = self.data['cookie'].get("lezhin")).content
                     with open(f'{path}\\{id}\\{i}\\{c}.jpg', 'wb') as handler:
                         c+=1
                         handler.write(img_data)
