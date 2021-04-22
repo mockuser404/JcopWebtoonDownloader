@@ -7,7 +7,7 @@ Jcop Webtoon Downloader is the swift and stable downloader. It support Naver Com
 
 ## Download
 ---
-[Relrease List](https://github.com/mynameispyo/JcopWebtoonDownloader/releases)
+[Release List](https://github.com/mynameispyo/JcopWebtoonDownloader/releases)
 
 ## Screenshot
 ---
