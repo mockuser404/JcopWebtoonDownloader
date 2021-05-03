@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	ProgramVersion = "v3.1.1"
+	ProgramVersion = "v3.1.2"
 	BlogUrl        = "https://blog.naver.com/the3countrys/222106929101"
 
 	appData string = "\\AppData\\Local\\JcopWebtoonDownloader"

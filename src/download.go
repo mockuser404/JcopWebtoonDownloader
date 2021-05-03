@@ -485,7 +485,9 @@ func (df *DownloadForm) lezhinComicsDownload(folder string) {
 	for episode := start; episode <= stop; episode++ {
 		titleID := df.id.Text()
 	
-		resp, err := requestWithCookie(lezhinBaseURL+"?alias="+df.id.Text()+"&name="+strconv.Itoa(episode)+"&type=comic_episode", "GET", "x-lz-locale=ko_KR;")
+		reqHeader := make(map[string]string, 2)
+		reqHeader["x-lz-locale"] = "ko_KR"
+		resp, err := requestWithheader(lezhinBaseURL+"?alias="+df.id.Text()+"&name="+strconv.Itoa(episode)+"&type=comic_episode", "GET", reqHeader)
 		if err != nil {
 			mw.openErrorMessBox("Error", err.Error())
 			resetDownloadButton()
@@ -606,6 +608,25 @@ func requestWithCookieNBody(urlname, method, cookie string, body map[string]stri
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("User-Agent", UserAgent)
 	req.Header.Set("Cookie", cookie)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Body, nil
+}
+
+func requestWithheader(urlname, method string, header map[string]string) (io.Reader, error) {
+
+	req, err := http.NewRequest(method, urlname, nil)
+	if err != nil {
+		return nil, err
+	}
+	for key, val := range header{
+		req.Header.Add(key, val)
+	}
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
