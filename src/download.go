@@ -3,13 +3,14 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
+	"sort"
 	"strconv"
-	"fmt"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/buger/jsonparser"
@@ -24,18 +25,17 @@ var err error
 
 func webtoonDownload() {
 	if WebtoonDownloadForm.wtype.CurrentIndex() == 0 {
-		WebtoonDownloadForm.NaverComicDownload(WebtoonDownloadForm.folder+"\\"+WebtoonDownloadForm.id.Text())
+		WebtoonDownloadForm.NaverComicDownload(WebtoonDownloadForm.folder + "\\" + WebtoonDownloadForm.id.Text())
 	} else if WebtoonDownloadForm.wtype.CurrentIndex() == 1 {
-		WebtoonDownloadForm.KakaoPageDownload(WebtoonDownloadForm.folder+"\\"+WebtoonDownloadForm.id.Text())
+		WebtoonDownloadForm.KakaoPageDownload(WebtoonDownloadForm.folder + "\\" + WebtoonDownloadForm.id.Text())
 	} else if WebtoonDownloadForm.wtype.CurrentIndex() == 2 {
-		WebtoonDownloadForm.daumWebtoonDownload(WebtoonDownloadForm.folder+"\\"+WebtoonDownloadForm.id.Text())
+		WebtoonDownloadForm.daumWebtoonDownload(WebtoonDownloadForm.folder + "\\" + WebtoonDownloadForm.id.Text())
 	} else if WebtoonDownloadForm.wtype.CurrentIndex() == 3 {
-		WebtoonDownloadForm.lezhinComicsDownload(WebtoonDownloadForm.folder+"\\"+WebtoonDownloadForm.id.Text())
+		WebtoonDownloadForm.lezhinComicsDownload(WebtoonDownloadForm.folder + "\\" + WebtoonDownloadForm.id.Text())
 	} else {
 		mw.openWarningMessBox("Warning", "Please select type")
 	}
 }
-
 
 type DownloadForm struct {
 	wtype       *walk.ComboBox
@@ -77,36 +77,36 @@ func (df *DownloadForm) NaverComicDownload(folder string) {
 		titleID := df.id.Text()
 
 		var dataURL string
-	
+
 		resp, err := requestWithCookie(naverBaseURL+"?titleId="+titleID+"&no="+strconv.Itoa(episode), "GET", df.cookie.naverComicData)
 		if err != nil {
 			mw.openErrorMessBox("Error", err.Error())
 			resetDownloadButton()
 			return
 		}
-	
+
 		doc, err := goquery.NewDocumentFromReader(resp)
 		if err != nil {
 			mw.openErrorMessBox("Error", err.Error())
 			resetDownloadButton()
 			return
 		}
-	
+
 		NumImg := doc.Find(".wt_viewer").Find("img").Length()
-	
+
 		if NumImg <= 0 {
 			mw.openWarningMessBox("Warning", "Can't find Images")
 			resetDownloadButton()
 			return
 		}
-	
+
 		err = os.MkdirAll(folder+"/"+strconv.Itoa(episode), os.ModePerm)
 		if err != nil {
 			mw.openErrorMessBox("Error", err.Error())
 			resetDownloadButton()
 			return
 		}
-		
+
 		errchan := make(chan error, NumImg)
 		doc.Find(".wt_viewer").Find("img").Each(func(j int, s *goquery.Selection) {
 			dataURL, _ = s.Attr("src")
@@ -120,7 +120,7 @@ func (df *DownloadForm) NaverComicDownload(folder string) {
 				return
 			}
 		}
-	
+
 		content := "<html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><style>body, html{margin: 0;border: 0;padding: 0;}@media only screen and (max-width: 700px) {img {width: 100%;}}</style><title>Episode " + strconv.Itoa(episode) + " (" + titleID + ")</title></head><body><center>"
 		for l := 1; l <= NumImg; l++ {
 			content += "<img src='"
@@ -128,7 +128,7 @@ func (df *DownloadForm) NaverComicDownload(folder string) {
 			content += ".jpg'><br>"
 		}
 		content += "</body></center></html>"
-	
+
 		err = ioutil.WriteFile(folder+"/"+strconv.Itoa(episode)+"/"+strconv.Itoa(episode)+".html", []byte(content), 0)
 		if err != nil {
 			mw.openErrorMessBox("Error", err.Error())
@@ -171,7 +171,7 @@ func (df *DownloadForm) KakaoPageDownload(folder string) {
 	buttonLog.SetEnabled(false)
 	buttonLog.SetText("Downloading... " + fmt.Sprintf("%.2f", processing) + "%")
 
-	// dl 
+	// dl
 
 	titleID := df.id.Text()
 
@@ -190,7 +190,7 @@ func (df *DownloadForm) KakaoPageDownload(folder string) {
 
 	for episode := start; episode <= stop; episode++ {
 		if episode > len(ids) {
-			mw.openWarningMessBox("Warning", "Can't find Epi" + strconv.Itoa(episode))
+			mw.openWarningMessBox("Warning", "Can't find Epi"+strconv.Itoa(episode))
 			resetDownloadButton()
 			return
 		}
@@ -201,11 +201,11 @@ func (df *DownloadForm) KakaoPageDownload(folder string) {
 			return
 		}
 		if len(response) <= 0 {
-			mw.openWarningMessBox("Warning", "Epi" + strconv.Itoa(episode) + " - Can't find images")
+			mw.openWarningMessBox("Warning", "Epi"+strconv.Itoa(episode)+" - Can't find images")
 			resetDownloadButton()
 			return
 		}
-	
+
 		err = os.MkdirAll(folder+"/"+strconv.Itoa(episode), os.ModePerm)
 		if err != nil {
 			mw.openErrorMessBox("Error", err.Error())
@@ -214,7 +214,7 @@ func (df *DownloadForm) KakaoPageDownload(folder string) {
 		}
 		errchan := make(chan error, len(response))
 		for anchor := range response {
-	
+
 			go downloadFile("http://page-edge-jz.kakao.com/sdownload/resource/"+response[anchor], folder+"/"+strconv.Itoa(episode)+"/"+strconv.Itoa(anchor+1)+".jpg", errchan)
 		}
 		for i := 0; i < len(response); i++ {
@@ -225,7 +225,7 @@ func (df *DownloadForm) KakaoPageDownload(folder string) {
 				return
 			}
 		}
-	
+
 		content := "<html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><style>body, html{margin: 0;border: 0;padding: 0;}@media only screen and (max-width: 700px) {img {width: 100%;}}</style><title>Episode " + strconv.Itoa(episode) + " (" + titleID + ")</title></head><body><center>"
 		for l := 1; l <= len(response); l++ {
 			content += "<img src='"
@@ -233,7 +233,7 @@ func (df *DownloadForm) KakaoPageDownload(folder string) {
 			content += ".jpg'><br>"
 		}
 		content += "</body></center></html>"
-	
+
 		err = ioutil.WriteFile(folder+"/"+strconv.Itoa(episode)+"/"+strconv.Itoa(episode)+".html", []byte(content), 0)
 		c += 1
 		processing = (float32(c) / float32(stop-start+1)) * 100
@@ -335,7 +335,7 @@ func (df *DownloadForm) daumWebtoonDownload(folder string) {
 	c := 0
 	buttonLog.SetEnabled(false)
 	buttonLog.SetText("Downloading... " + fmt.Sprintf("%.2f", processing) + "%")
-	
+
 	// dl
 
 	titleID := df.id.Text()
@@ -354,7 +354,7 @@ func (df *DownloadForm) daumWebtoonDownload(folder string) {
 	}
 	for episode := start; episode <= stop; episode++ {
 		if episode > len(ids) {
-			mw.openWarningMessBox("Warning", "Can't find Epi" + strconv.Itoa(episode))
+			mw.openWarningMessBox("Warning", "Can't find Epi"+strconv.Itoa(episode))
 			resetDownloadButton()
 			return
 		}
@@ -365,11 +365,11 @@ func (df *DownloadForm) daumWebtoonDownload(folder string) {
 			return
 		}
 		if len(response) <= 0 {
-			mw.openWarningMessBox("Warning", "Epi" + strconv.Itoa(episode) + " - Can't find images")
+			mw.openWarningMessBox("Warning", "Epi"+strconv.Itoa(episode)+" - Can't find images")
 			resetDownloadButton()
 			return
 		}
-	
+
 		err = os.MkdirAll(folder+"/"+strconv.Itoa(episode), os.ModePerm)
 		if err != nil {
 			mw.openErrorMessBox("Error", err.Error())
@@ -378,7 +378,7 @@ func (df *DownloadForm) daumWebtoonDownload(folder string) {
 		}
 		errchan := make(chan error, len(response))
 		for anchor := range response {
-	
+
 			go downloadFile(response[anchor], folder+"/"+strconv.Itoa(episode)+"/"+strconv.Itoa(anchor+1)+".jpg", errchan)
 		}
 		for i := 0; i < len(response); i++ {
@@ -389,7 +389,7 @@ func (df *DownloadForm) daumWebtoonDownload(folder string) {
 				return
 			}
 		}
-	
+
 		content := "<html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><style>body, html{margin: 0;border: 0;padding: 0;}@media only screen and (max-width: 700px) {img {width: 100%;}}</style><title>Episode " + strconv.Itoa(episode) + " (" + titleID + ")</title></head><body><center>"
 		for l := 1; l <= len(response); l++ {
 			content += "<img src='"
@@ -397,7 +397,7 @@ func (df *DownloadForm) daumWebtoonDownload(folder string) {
 			content += ".jpg'><br>"
 		}
 		content += "</body></center></html>"
-	
+
 		err = ioutil.WriteFile(folder+"/"+strconv.Itoa(episode)+"/"+strconv.Itoa(episode)+".html", []byte(content), 0)
 		c += 1
 		processing = (float32(c) / float32(stop-start+1)) * 100
@@ -442,7 +442,7 @@ func (df *DownloadForm) daumGetTitlesURL(seriesid string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	output := make([]string, 0)
+	output := make([]int, 0)
 
 	type eachFiles struct {
 		Id int `json:"id"`
@@ -452,9 +452,14 @@ func (df *DownloadForm) daumGetTitlesURL(seriesid string) ([]string, error) {
 	files, err := jsonparser.GetUnsafeString(downloadData, "data", "webtoon", "webtoonEpisodes")
 	json.Unmarshal([]byte(files), &outputFiles)
 	for i := range outputFiles {
-		output = append(output, strconv.Itoa(outputFiles[i].Id))
+		output = append(output, outputFiles[i].Id)
 	}
-	return output, nil
+	sort.Ints(output)
+	strOutput := make([]string, len(output))
+	for c := range output{
+		strOutput[c] = strconv.Itoa(output[c])
+	}
+	return strOutput, nil
 }
 
 func (df *DownloadForm) lezhinComicsDownload(folder string) {
@@ -484,7 +489,7 @@ func (df *DownloadForm) lezhinComicsDownload(folder string) {
 	buttonLog.SetText("Downloading... " + fmt.Sprintf("%.2f", processing) + "%")
 	for episode := start; episode <= stop; episode++ {
 		titleID := df.id.Text()
-	
+
 		reqHeader := make(map[string]string, 2)
 		reqHeader["x-lz-locale"] = "ko_KR"
 		resp, err := requestWithheader(lezhinBaseURL+"?alias="+df.id.Text()+"&name="+strconv.Itoa(episode)+"&type=comic_episode", "GET", reqHeader)
@@ -493,7 +498,7 @@ func (df *DownloadForm) lezhinComicsDownload(folder string) {
 			resetDownloadButton()
 			return
 		}
-	
+
 		downloadData, err := ioutil.ReadAll(resp)
 		if err != nil {
 			mw.openErrorMessBox("Error", err.Error())
@@ -501,24 +506,24 @@ func (df *DownloadForm) lezhinComicsDownload(folder string) {
 			return
 		}
 		imgs := make([]string, 0)
-	
+
 		type eachFiles struct {
 			Path string `json:"path"`
 		}
-	
+
 		var outputFiles []eachFiles
 		files, err := jsonparser.GetUnsafeString(downloadData, "data", "extra", "episode", "scrollsInfo")
 		json.Unmarshal([]byte(files), &outputFiles)
 		for i := range outputFiles {
 			imgs = append(imgs, outputFiles[i].Path)
 		}
-	
+
 		if len(imgs) <= 0 {
 			mw.openWarningMessBox("Warning", "Can't find Images")
 			resetDownloadButton()
 			return
 		}
-	
+
 		err = os.MkdirAll(folder+"/"+strconv.Itoa(episode), os.ModePerm)
 		if err != nil {
 			mw.openErrorMessBox("Error", err.Error())
@@ -537,7 +542,7 @@ func (df *DownloadForm) lezhinComicsDownload(folder string) {
 				return
 			}
 		}
-	
+
 		content := "<html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><style>body, html{margin: 0;border: 0;padding: 0;}@media only screen and (max-width: 700px) {img {width: 100%;}}</style><title>Episode " + strconv.Itoa(episode) + " (" + titleID + ")</title></head><body><center>"
 		for l := 1; l <= len(imgs); l++ {
 			content += "<img src='"
@@ -545,7 +550,7 @@ func (df *DownloadForm) lezhinComicsDownload(folder string) {
 			content += ".jpg'><br>"
 		}
 		content += "</body></center></html>"
-	
+
 		err = ioutil.WriteFile(folder+"/"+strconv.Itoa(episode)+"/"+strconv.Itoa(episode)+".html", []byte(content), 0)
 		c += 1
 		processing = (float32(c) / float32(stop-start+1)) * 100
@@ -624,7 +629,7 @@ func requestWithheader(urlname, method string, header map[string]string) (io.Rea
 	if err != nil {
 		return nil, err
 	}
-	for key, val := range header{
+	for key, val := range header {
 		req.Header.Add(key, val)
 	}
 
@@ -637,7 +642,7 @@ func requestWithheader(urlname, method string, header map[string]string) (io.Rea
 	return resp.Body, nil
 }
 
-func resetDownloadButton(){
+func resetDownloadButton() {
 	buttonLog.SetText("Download")
 	buttonLog.SetEnabled(true)
 }
