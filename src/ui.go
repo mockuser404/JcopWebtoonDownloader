@@ -40,8 +40,8 @@ func askCookie(owner walk.Form, cookieType *string, requireCookies []string) (in
 						AssignTo: &acceptPB,
 						Text:     "OK",
 						OnClicked: func() {
+							*cookieType = "" 
 							for i := range requireCookies {
-
 								*cookieType += requireCookies[i] + "=" + accesstokenLineEdit[i].Text() + "; "
 							}
 							SaveFormData()

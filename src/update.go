@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Version = "v4.1.1"
+	Version = "v4.1.2"
 )
 
 func NewVersionCheck() {
