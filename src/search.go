@@ -2,125 +2,101 @@ package main
 
 import (
 	"errors"
-	"io/ioutil"
-	"net/http"
 	"net/url"
+	"strings"
 
-	"github.com/PuerkitoBio/goquery"
-	"github.com/buger/jsonparser"
+	"github.com/lxn/walk"
 )
 
-func SearchWebtoonId(){
-	var id string
-	if WebtoonDownloadForm.wtype.CurrentIndex() == 0 {
-		err, id = SearchNaverId(WebtoonDownloadForm.id.Text())
-	} else if WebtoonDownloadForm.wtype.CurrentIndex() == 1 {
-		err, id = SearchKakaoId(WebtoonDownloadForm.id.Text())
-	} else if WebtoonDownloadForm.wtype.CurrentIndex() == 2 {
-		err, id = SearchDaumId(WebtoonDownloadForm.id.Text())
-	} else if WebtoonDownloadForm.wtype.CurrentIndex() == 3 {
-		err, id = SearchLezhinId(WebtoonDownloadForm.id.Text())
-	} else {
-		mw.openWarningMessBox("Warning", "Please select type")
-	}
-	if err != nil {
-		mw.openWarningMessBox("Warning", err.Error())
-		return
-	}
-	WebtoonDownloadForm.id.SetText(id)
-}
-func SearchKakaoId(search string) (error, string) {
-	resp, err := http.Get("https://page.kakao.com/search?word=" + url.QueryEscape(search))
-	if err != nil {
-		return err, ""
-	}
-	defer resp.Body.Close()
-
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
-	if err != nil {
-		return err, ""
-	}
-
-	NumImg := doc.Find(".css-4cffwv").Length()
-	if NumImg <= 0 {
-		return errors.New("No Search Result"), ""
-	}
-	firstResult := doc.Find(".css-4cffwv").First()
-	firstResultUrl, _ := firstResult.Attr("href")
-	err, firstResultId := getIdFromUrl(firstResultUrl)
-	if err != nil {
-		return err, ""
-	}
-	return nil, firstResultId
+type EnvModel struct {
+	walk.ListModelBase
+	items []string
 }
 
-func SearchNaverId(search string) (error, string) {
-	resp, err := http.Get("https://comic.naver.com/search.nhn?keyword=" + url.QueryEscape(search))
-	if err != nil {
-		return err, ""
-	}
-	defer resp.Body.Close()
-
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
-	if err != nil {
-		return err, ""
-	}
-
-	firstResultUrl, exist := doc.Find(".resultList").First().Find("li").Find("h5").Find("a").First().Attr("href")
-	if !exist {
-		return errors.New("No Search Result"), ""
-	}
-	err, firstResultId := getIdFromUrl(firstResultUrl)
-	if err != nil {
-		return err, ""
-	}
-	return nil, firstResultId
+func (m *EnvModel) ItemCount() int {
+	return len(m.items)
 }
 
-
-func SearchLezhinId(search string) (error, string) {
-	resp, err := http.Get("https://dondog.lezhin.com/search?&v=2&type=comic&lang=ko&q=" + url.QueryEscape(search))
-	if err != nil {
-		return err, ""
-	}
-	defer resp.Body.Close()
-
-	json, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err, ""
-	}
-
-	firstResultId, err := jsonparser.GetString(json, "sections", "[0]", "items", "[0]", "alias")
-	if err != nil {
-		return errors.New("No Search Result"), ""
-	}
-	return nil, firstResultId
+func (m *EnvModel) Value(index int) interface{} {
+	return m.items[index]
 }
 
-func SearchDaumId(search string) (error, string) {
-	resp, err := http.Get("http://webtoon.daum.net/data/pc/search/suggest?q=" + url.QueryEscape(search))
+func LoadEpis() {
+	buff, err := url.Parse(WDdata.TitleIdURL.Text())
 	if err != nil {
-		return err, ""
-	}
-	defer resp.Body.Close()
-
-	json, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err, ""
+		Log(2, err)
 	}
 
-	firstResultId, err := jsonparser.GetString(json, "data", "[0]", "nickname")
+	values, err := url.ParseQuery(buff.RawQuery)
 	if err != nil {
-		return errors.New("No Search Result"), ""
+		Log(2, err)
 	}
-	return nil, firstResultId
-}
+	switch WDdata.Type.CurrentIndex() {
+	case -1:
+		Log(2, errors.New("Please Select Website"))
+	case 0:
+		if values.Get("titleId") != "" {
 
-func getIdFromUrl(url string) (error, string) {
-	for i := 0; i < len(url); i++ {
-		if url[i] == '=' {
-			return nil, url[i+1:]
+			WDform.NaverComic.TitleId = values.Get("titleId")
+			go func() {
+				LoadingOn()
+				err = WDform.NaverComic.GetEpiData()
+				if err != nil {
+					Log(2, err)
+				}
+				WDdata.StartControl.SetModel(&EnvModel{items: WDform.NaverComic.EpisodeName})
+				WDdata.StopControl.SetModel(&EnvModel{items: WDform.NaverComic.EpisodeName})
+				LoadingOff()
+			}()
+		} else {
+			Log(2, errors.New("Can't find id from URL"))
 		}
+	case 1:
+		if values.Get("seriesId") != "" {
+
+			WDform.KakaoPage.TitleId = values.Get("seriesId")
+			go func() {
+				LoadingOn()
+				err = WDform.KakaoPage.GetEpiData()
+				if err != nil {
+					Log(2, err)
+				}
+				WDdata.StartControl.SetModel(&EnvModel{items: WDform.KakaoPage.EpisodeName})
+				WDdata.StopControl.SetModel(&EnvModel{items: WDform.KakaoPage.EpisodeName})
+				LoadingOff()
+			}()
+		} else {
+			Log(2, errors.New("Can't find id from URL"))
+		}
+	case 2:
+		WDform.DaumWebtoon.TitleId = strings.Split(buff.Path, "/")[len(strings.Split(buff.Path, "/"))-1]
+		go func() {
+			LoadingOn()
+			err = WDform.DaumWebtoon.GetEpiData()
+			if err != nil {
+				Log(2, err)
+			}
+			WDdata.StartControl.SetModel(&EnvModel{items: WDform.DaumWebtoon.EpisodeName})
+			WDdata.StopControl.SetModel(&EnvModel{items: WDform.DaumWebtoon.EpisodeName})
+			LoadingOff()
+		}()
+	case 3:
+		WDform.LezhinComics.TitleId = strings.Split(buff.Path, "/")[len(strings.Split(buff.Path, "/"))-1]
+		go func() {
+			LoadingOn()
+			err = WDform.LezhinComics.GetEpiData()
+			if err != nil {
+				Log(2, err)
+			}
+			WDdata.StartControl.SetModel(&EnvModel{items: WDform.LezhinComics.EpisodeName})
+			WDdata.StopControl.SetModel(&EnvModel{items: WDform.LezhinComics.EpisodeName})
+			LoadingOff()
+		}()
 	}
-	return errors.New("Invalid Url"), ""
+
+	// m := &EnvModel{items: make([]string, 2)}
+	// m.items[0] = "1"
+	// m.items[1] = "3"
+	// WDform.StartControl.SetModel(m)
+	// log.Println(WDform.Start)
 }

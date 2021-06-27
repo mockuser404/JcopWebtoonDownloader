@@ -4,13 +4,10 @@ import (
 	"encoding/json"
 	"os"
 	"os/user"
-
-	"github.com/lxn/walk"
 )
 
 const (
-	ProgramVersion = "v3.1.2"
-	BlogUrl        = "https://blog.naver.com/the3countrys/222106929101"
+	BlogUrl = "https://blog.naver.com/the3countrys/222106929101"
 
 	appData string = "\\AppData\\Local\\JcopWebtoonDownloader"
 )
@@ -20,23 +17,27 @@ var (
 )
 
 func setNaverComicCookieData() {
-	naverComicData := &naverComicCookieForm{}
-	if cmd, err := naverComicData.RunDialog(mw); err != nil {
-		mw.openErrorMessBox("Error", err.Error())
-	} else if cmd == walk.DlgCmdOK {
-		WebtoonDownloadForm.cookie.naverComicData = "NID_AUT=" + naverComicData.NIDAUT + "; NID_SES=" + naverComicData.NIDSES + ";"
-		SaveFormData()
+	requireCookies := make([]string, 2)
+	requireCookies[0] = "NID_AUT"
+	requireCookies[1] = "NID_SES"
+	if _, err := askCookie(mw, &(WDform.NaverComic.Cookies), requireCookies); err != nil {
+		Log(1, err)
 	}
 }
 
 func setKakaoPageCookieData() {
-	kakaoPageData := &kakaoPageCookieForm{}
-	if cmd, err := kakaoPageData.RunDialog(mw); err != nil {
-		mw.openErrorMessBox("Error", err.Error())
-	} else if cmd == walk.DlgCmdOK {
-		WebtoonDownloadForm.cookie.kakaoPageData = `_kawlt=` + kakaoPageData.Kawlt + `; _kawlp=` + kakaoPageData.Kawlp + `; _kawlptea=` + kakaoPageData.Kawlptea + `;`
-		WebtoonDownloadForm.deviceId = kakaoPageData.DeviceId
-		SaveFormData()
+	requireCookies := make([]string, 3)
+	requireCookies[0] = "_kpawlt"
+	requireCookies[1] = "_kpawltea"
+	requireCookies[2] = "_kpawlst"
+	if _, err := askCookie(mw, &(WDform.KakaoPage.Cookies), requireCookies); err != nil {
+		Log(1, err)
+	}
+}
+
+func setLezhinComicCookieData() {
+	if _, err := lezhinRunDialog(mw); err != nil {
+		Log(1, err)
 	}
 }
 
@@ -76,7 +77,7 @@ func loadDefaultDir() error {
 			return err
 		}
 		mkfile.WriteString(homeDir + "\\Documents\\Jcop Webtoon Downloader")
-		WebtoonDownloadForm.folder = homeDir + "\\Documents\\Jcop Webtoon Downloader"
+		WDdata.Folder = homeDir + "\\Documents\\Jcop Webtoon Downloader"
 		return nil
 	}
 	dat := make([]byte, 9999)
@@ -85,7 +86,7 @@ func loadDefaultDir() error {
 	if err != nil {
 		return err
 	}
-	WebtoonDownloadForm.folder = string(dat[:size])
+	WDdata.Folder = string(dat[:size])
 	return nil
 }
 
@@ -103,7 +104,6 @@ type dataForm struct {
 	Naver       string `json:"naver"`
 	Kakao       string `json:"kakao"`
 	Accesstoken string `json:"accesstoken"`
-	DeviceId    string `json:"deviceid"`
 }
 
 func loadFormData() error {
@@ -116,8 +116,8 @@ func loadFormData() error {
 		if err != nil {
 			return err
 		}
-		mkfile.WriteString(`{"naver":"","kakao":"","accesstoken":"","deviceid":""}`)
-		WebtoonDownloadForm.folder = homeDir + "\\Documents\\Jcop Webtoon Downloader"
+		mkfile.WriteString(`{"naver":"","kakao":"","accesstoken":""}`)
+		WDdata.Folder = homeDir + "\\Documents\\Jcop Webtoon Downloader"
 		return nil
 	}
 	dat := make([]byte, 9999)
@@ -131,19 +131,17 @@ func loadFormData() error {
 	if err != nil {
 		return nil
 	}
-	WebtoonDownloadForm.cookie.naverComicData = readDataForm.Naver
-	WebtoonDownloadForm.cookie.kakaoPageData = readDataForm.Kakao
-	WebtoonDownloadForm.accesstoken = readDataForm.Accesstoken
-	WebtoonDownloadForm.deviceId = readDataForm.DeviceId
+	WDform.NaverComic.Cookies = readDataForm.Naver
+	WDform.KakaoPage.Cookies = readDataForm.Kakao
+	WDform.LezhinComics.AccessToken = readDataForm.Accesstoken
 	return nil
 }
 
 func SaveFormData() error {
 	newFormData := dataForm{
-		Naver:       WebtoonDownloadForm.cookie.naverComicData,
-		Kakao:       WebtoonDownloadForm.cookie.kakaoPageData,
-		Accesstoken: WebtoonDownloadForm.accesstoken,
-		DeviceId:    WebtoonDownloadForm.deviceId,
+		Naver:       WDform.NaverComic.Cookies,
+		Kakao:       WDform.KakaoPage.Cookies,
+		Accesstoken: WDform.LezhinComics.AccessToken,
 	}
 	stringFormData, err := json.Marshal(newFormData)
 	if err != nil {

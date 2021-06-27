@@ -1,21 +1,27 @@
 package main
 
 import (
+	"log"
 	"os/exec"
 
 	"github.com/lxn/walk"
+	"github.com/mynameispyo/JcopWebtoonDownloader/WTdown"
 
 	. "github.com/lxn/walk/declarative"
 )
 
 var (
-	mw                  = new(MyMainWindow)
-	WebtoonDownloadForm = DownloadForm{}
-	buttonLog           = new(walk.PushButton)
+	mw = new(MyMainWindow)
+
+	WDdata = DownloadData{Start: &EnvModel{items: make([]string, 0)},Stop: &EnvModel{items: make([]string, 0)}, Thread: 70}
+	WDform = WTdown.WTdown{}
+
+	buttonLog = new(walk.PushButton)
+	err       error
 )
 
 func main() {
-	MainWindow{
+	err = MainWindow{
 		Icon:     "img\\downloader.ico",
 		AssignTo: &mw.MainWindow,
 		Title:    "Jcop Webtoon Downloader",
@@ -38,9 +44,7 @@ func main() {
 							},
 							Action{
 								Text: "Lezhin Comics",
-								OnTriggered: func() {
-									lezhinRunDialog(mw)
-								},
+								OnTriggered: setLezhinComicCookieData,
 							},
 						},
 					},
@@ -62,7 +66,7 @@ func main() {
 							if err != nil {
 								mw.openErrorMessBox("Error", err.Error())
 							}
-							WebtoonDownloadForm.folder = dlg.FilePath
+							WDdata.Folder = dlg.FilePath
 						},
 					},
 				},
@@ -73,7 +77,7 @@ func main() {
 					Action{
 						Text: "Open Default Directory",
 						OnTriggered: func() {
-							err = exec.Command("rundll32", "url.dll,FileProtocolHandler", WebtoonDownloadForm.folder).Start()
+							err = exec.Command("rundll32", "url.dll,FileProtocolHandler", WDdata.Folder).Start()
 							if err != nil {
 								mw.openErrorMessBox("Error", err.Error())
 							}
@@ -87,7 +91,7 @@ func main() {
 					Action{
 						Text: "Version",
 						OnTriggered: func() {
-							mw.openInfoMessBox("Version", ProgramVersion)
+							mw.openInfoMessBox("Version", Version)
 						},
 					},
 					Action{
@@ -103,90 +107,88 @@ func main() {
 			},
 		},
 		Children: []Widget{
-			Composite{
-				Layout: Grid{Columns: 2, Spacing: 10},
+			HSplitter{
+				Column: 3,
 				Children: []Widget{
-
-					Label{
-						Font: Font{PointSize: 12, Bold: true},
-						Text: "Type",
+					ListBox{
+						AssignTo: &(WDdata.StartControl),
+						Model:    WDdata.Start,
 					},
-					ComboBox{
-						Font:     Font{PointSize: 12, Bold: true},
-						Model:    GetWebtoonTypes(),
-						AssignTo: &(WebtoonDownloadForm.wtype),
-
-						BindingMember: "Id",
-						DisplayMember: "Type",
-					},
-
-					Label{
-						Font: Font{PointSize: 12, Bold: true},
-						Text: "ID",
+					ListBox{
+						AssignTo: &(WDdata.StopControl),
+						Model:    WDdata.Stop,
 					},
 					Composite{
-						Layout: HBox{Spacing: 3, MarginsZero: true},
+						Layout: VBox{},
 						Children: []Widget{
-							LineEdit{
-								Font:     Font{PointSize: 12, Bold: true},
-								AssignTo: &(WebtoonDownloadForm.id),
+							Composite{
+								Layout: Grid{Columns: 2, Spacing: 10},
+								Children: []Widget{
+
+									Label{
+										Font: Font{PointSize: 12},
+										Text: "Website",
+									},
+									ComboBox{
+										Font:     Font{PointSize: 12},
+										Model:    GetWebtoonTypes(),
+										AssignTo: &(WDdata.Type),
+
+										BindingMember: "Id",
+										DisplayMember: "Type",
+									},
+
+									Label{
+										Font: Font{PointSize: 12},
+										Text: "URL",
+									},
+									Composite{
+										Layout: HBox{Spacing: 3, MarginsZero: true},
+										Children: []Widget{
+											LineEdit{
+												Font:     Font{PointSize: 12},
+												AssignTo: &(WDdata.TitleIdURL),
+											},
+											PushButton{
+												Font:      Font{PointSize: 12},
+												MaxSize:   Size{35, 10},
+												Text:      "🔍",
+												OnClicked: LoadEpis,
+											},
+										},
+									},
+								},
 							},
 							PushButton{
-								Font: Font{PointSize: 12, Bold: true},
-								MaxSize: Size{35,10},
-								Text: "🔍",
-								OnClicked: SearchWebtoonId,
-							},
-						},
-					},
 
-					Label{
-						Font: Font{PointSize: 12, Bold: true},
-						Text: "Episodes",
-					},
-					Composite{
-						Layout: HBox{Spacing: 3, MarginsZero: true},
-						Children: []Widget{
-							LineEdit{
-								Font:     Font{PointSize: 12, Bold: true},
-								AssignTo: &(WebtoonDownloadForm.start),
-							},
-							Label{
-								Font: Font{PointSize: 12, Bold: true},
-								Text: "~",
-							},
-							LineEdit{
-								Font:     Font{PointSize: 12, Bold: true},
-								AssignTo: &(WebtoonDownloadForm.stop),
-							},
-						},
-					},
-				},
-			},
-			Composite{
-				Layout: HBox{},
-				Children: []Widget{
-					PushButton{
+								Font: Font{PointSize: 12},
+								// AssignTo: &acceptPB,
+								AssignTo: &buttonLog,
+								Text:     "Download",
+								OnClicked: func() {
 
-						Font: Font{PointSize: 12, Bold: true},
-						// AssignTo: &acceptPB,
-						AssignTo: &buttonLog,
-						Text:     "Download",
-						OnClicked: func() {
+									go WebtoonDownload()
 
-							go webtoonDownload()
-
+								},
+							},
 						},
 					},
 				},
 			},
 		},
+		// Children: []Widget{},
 	}.Create()
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	mw.SetBounds(walk.Rectangle{0, 0, 500, 140}) // You can use GetSystemMetrics from the `win` package to get the screen resolution
+
 	loadSettingData()
-
-	mw.SetBounds(walk.Rectangle{0, 0, 420, 140}) // You can use GetSystemMetrics from the `win` package to get the screen resolution
-
+	NewVersionCheck()
 	mw.Run()
+
 }
 
 type MyMainWindow struct {
