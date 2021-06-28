@@ -25,7 +25,7 @@ func askCookie(owner walk.Form, cookieType *string, requireCookies []string) (in
 		Title:         "Set Cookie data",
 		DefaultButton: &acceptPB,
 		CancelButton:  &cancelPB,
-		MinSize:       Size{300, 200},
+		MinSize:       Size{Width:300, Height:200},
 		Layout:        VBox{},
 		Children: []Widget{
 			Composite{
@@ -59,29 +59,39 @@ func askCookie(owner walk.Form, cookieType *string, requireCookies []string) (in
 	}.Run(owner)
 }
 
-func lezhinRunDialog(owner walk.Form) (int, error) {
+func lezhinRunDialog(owner walk.Form,cookieType *string, requireCookies []string) (int, error) {
 	var dlg *walk.Dialog
-	var accesstokenLineEdit *walk.LineEdit
+	accesstokenLineEdit := make([]*walk.LineEdit, len(requireCookies)+1)
+	// requireCookies = append(requireCookies, "access_token")
 	var acceptPB, cancelPB *walk.PushButton
+
+	var eachForm []Widget
+	for i := range requireCookies {
+		eachForm = append(eachForm, Label{
+			Text: requireCookies[i],
+		})
+		eachForm = append(eachForm, LineEdit{
+			AssignTo: &accesstokenLineEdit[i],
+		})
+	}
+	eachForm = append(eachForm, Label{
+		Text: "access_token(NOT COOKIE)",
+	})
+	eachForm = append(eachForm, LineEdit{
+		AssignTo: &accesstokenLineEdit[len(requireCookies)],
+	})
 
 	return Dialog{
 		AssignTo:      &dlg,
 		Title:         "Set Lezhin access token",
 		DefaultButton: &acceptPB,
 		CancelButton:  &cancelPB,
-		MinSize:       Size{300, 200},
+		MinSize:       Size{Width:300, Height:200},
 		Layout:        VBox{},
 		Children: []Widget{
 			Composite{
 				Layout: Grid{Columns: 2},
-				Children: []Widget{
-					Label{
-						Text: "access_token:",
-					},
-					LineEdit{
-						AssignTo: &accesstokenLineEdit,
-					},
-				},
+				Children: eachForm,
 			},
 			Composite{
 				Layout: HBox{},
@@ -91,7 +101,11 @@ func lezhinRunDialog(owner walk.Form) (int, error) {
 						AssignTo: &acceptPB,
 						Text:     "OK",
 						OnClicked: func() {
-							WDform.LezhinComics.AccessToken = accesstokenLineEdit.Text()
+							*cookieType = "" 
+							for i := range requireCookies {
+								*cookieType += requireCookies[i] + "=" + accesstokenLineEdit[i].Text() + "; "
+							}
+							WDform.LezhinComics.AccessToken = accesstokenLineEdit[len(requireCookies)].Text()
 							SaveFormData()
 							dlg.Cancel()
 						},

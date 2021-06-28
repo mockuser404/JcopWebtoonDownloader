@@ -36,7 +36,10 @@ func setKakaoPageCookieData() {
 }
 
 func setLezhinComicCookieData() {
-	if _, err := lezhinRunDialog(mw); err != nil {
+	requireCookies := make([]string, 2)
+	requireCookies[0] = "RSESSION"
+	requireCookies[1] = "cc"
+	if _, err := lezhinRunDialog(mw,&(WDform.LezhinComics.Cookies),requireCookies); err != nil {
 		Log(1, err)
 	}
 }
@@ -103,6 +106,7 @@ func setDefaultDir(path string) error {
 type dataForm struct {
 	Naver       string `json:"naver"`
 	Kakao       string `json:"kakao"`
+	Lezhin       string `json:"lezhin"`
 	Accesstoken string `json:"accesstoken"`
 }
 
@@ -116,7 +120,7 @@ func loadFormData() error {
 		if err != nil {
 			return err
 		}
-		mkfile.WriteString(`{"naver":"","kakao":"","accesstoken":""}`)
+		mkfile.WriteString(`{"naver":"","kakao":"","lezhin":"","accesstoken":""}`)
 		WDdata.Folder = homeDir + "\\Documents\\Jcop Webtoon Downloader"
 		return nil
 	}
@@ -133,6 +137,7 @@ func loadFormData() error {
 	}
 	WDform.NaverComic.Cookies = readDataForm.Naver
 	WDform.KakaoPage.Cookies = readDataForm.Kakao
+	WDform.LezhinComics.Cookies = readDataForm.Lezhin
 	WDform.LezhinComics.AccessToken = readDataForm.Accesstoken
 	return nil
 }
@@ -141,6 +146,7 @@ func SaveFormData() error {
 	newFormData := dataForm{
 		Naver:       WDform.NaverComic.Cookies,
 		Kakao:       WDform.KakaoPage.Cookies,
+		Lezhin:       WDform.LezhinComics.Cookies,
 		Accesstoken: WDform.LezhinComics.AccessToken,
 	}
 	stringFormData, err := json.Marshal(newFormData)

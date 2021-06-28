@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"log"
 	"net/url"
 	"strings"
 
@@ -81,6 +82,7 @@ func LoadEpis() {
 			LoadingOff()
 		}()
 	case 3:
+		log.Println(WDform.LezhinComics)
 		WDform.LezhinComics.TitleId = strings.Split(buff.Path, "/")[len(strings.Split(buff.Path, "/"))-1]
 		go func() {
 			LoadingOn()

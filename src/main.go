@@ -25,7 +25,7 @@ func main() {
 		Icon:     "img\\downloader.ico",
 		AssignTo: &mw.MainWindow,
 		Title:    "Jcop Webtoon Downloader",
-		MinSize:  Size{420, 140},
+		MinSize:  Size{Width:420, Height:140},
 		Layout:   VBox{},
 		MenuItems: []MenuItem{
 			Menu{
@@ -151,7 +151,7 @@ func main() {
 											},
 											PushButton{
 												Font:      Font{PointSize: 12},
-												MaxSize:   Size{35, 10},
+												MaxSize:   Size{Width:35, Height:10},
 												Text:      "🔍",
 												OnClicked: LoadEpis,
 											},
@@ -183,7 +183,7 @@ func main() {
 		log.Println(err)
 	}
 
-	mw.SetBounds(walk.Rectangle{0, 0, 500, 140}) // You can use GetSystemMetrics from the `win` package to get the screen resolution
+	mw.SetBounds(walk.Rectangle{X:0, Y:0, Width:500, Height:140}) // You can use GetSystemMetrics from the `win` package to get the screen resolution
 
 	loadSettingData()
 	NewVersionCheck()

@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Version = "v4.1.2"
+	Version = "v4.1.3"
 )
 
 func NewVersionCheck() {
@@ -65,7 +65,7 @@ func updateDialog(owner walk.Form, newestVersion, downloadUrl string) (int, erro
 		Title:         "New Version available",
 		DefaultButton: &acceptPB,
 		CancelButton:  &cancelPB,
-		MinSize:       Size{300, 200},
+		MinSize:       Size{Width:300, Height:200},
 		Layout:        VBox{},
 		Children: []Widget{
 			Composite{
@@ -121,8 +121,11 @@ func downloadFile(fileName string, url string) error {
 		return err
 	}
 	defer out.Close()
-
+	
 	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 
 	// Write the body to file
