@@ -218,5 +218,6 @@ func GetWebtoonTypes() []*WebtoonType {
 		{2, "Kakao Page"},
 		{3, "Daum Webtoon"},
 		{4, "Lezhin Comics"},
+		{5, "Kakao Page Epub"},
 	}
 }

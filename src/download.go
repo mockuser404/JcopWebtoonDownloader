@@ -52,6 +52,12 @@ func WebtoonDownload() {
 		if err != nil {
 			Log(code, err)
 		}
+	case 4:
+		makeNamspaceFolder(WDform.KPepub.TitleId)
+		code, err := WDform.KPepub.Download(WDdata.StartControl.CurrentIndex(), WDdata.StopControl.CurrentIndex(), WDdata.Folder + "\\" + WDform.KPepub.TitleId)
+		if err != nil {
+			Log(code, err)
+		}
 	}
 	LoadingOff()
 }

@@ -5,4 +5,5 @@ type WTdown struct {
 	KakaoPage
 	DaumWebtoon
 	LezhinComics
+	KPepub
 }

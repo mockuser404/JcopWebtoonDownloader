@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"log"
 	"net/url"
 	"strings"
 
@@ -82,7 +81,6 @@ func LoadEpis() {
 			LoadingOff()
 		}()
 	case 3:
-		log.Println(WDform.LezhinComics)
 		WDform.LezhinComics.TitleId = strings.Split(buff.Path, "/")[len(strings.Split(buff.Path, "/"))-1]
 		go func() {
 			LoadingOn()
@@ -94,6 +92,23 @@ func LoadEpis() {
 			WDdata.StopControl.SetModel(&EnvModel{items: WDform.LezhinComics.EpisodeName})
 			LoadingOff()
 		}()
+	case 4:
+		if values.Get("seriesId") != "" {
+
+			WDform.KPepub.TitleId = values.Get("seriesId")
+			go func() {
+				LoadingOn()
+				err = WDform.KPepub.GetEpiData()
+				if err != nil {
+					Log(2, err)
+				}
+				WDdata.StartControl.SetModel(&EnvModel{items: WDform.KPepub.EpisodeName})
+				WDdata.StopControl.SetModel(&EnvModel{items: WDform.KPepub.EpisodeName})
+				LoadingOff()
+			}()
+		} else {
+			Log(2, errors.New("Can't find id from URL"))
+		}
 	}
 
 	// m := &EnvModel{items: make([]string, 2)}
