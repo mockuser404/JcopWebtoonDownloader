@@ -109,7 +109,7 @@ func (kp *KPepub) downloadText(epubViewerId, outFile string) error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(outFile, []byte(outcontent), 0)
+	err = ioutil.WriteFile(outFile, []byte(`<head><meta charset="utf-8"></head>`+outcontent), 0)
 	if err != nil {
 		return err
 	}

@@ -1,5 +1,5 @@
 
 testing/
 build/*.exe
-output/
+output/*.exe
 v1/
