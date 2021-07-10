@@ -106,7 +106,10 @@ func (rd *RidiWT) GetEpiData() error {
 	rd.epis = make([]string, 0)
 	rd.EpisodeName = make([]string, 0)
 
-	resp, err := requestWithCookieNBody(RIDIWT_HOME_URL+rd.TitleId, "GET", make(map[string]string), make(map[string]string))
+	header := make(map[string]string)
+	header["Cookie"] = rd.Cookies
+
+	resp, err := requestWithCookieNBody(RIDIWT_HOME_URL+rd.TitleId, "GET", header, make(map[string]string))
 	if err != nil {
 		return err
 	}
