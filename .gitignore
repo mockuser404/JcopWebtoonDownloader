@@ -1,5 +1,7 @@
 
 testing/
+testing2/
 build/*.exe
 output/*.exe
+output/*.zip
 v1/
