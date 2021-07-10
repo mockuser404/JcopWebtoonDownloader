@@ -13,7 +13,7 @@ import (
 var (
 	mw = new(MyMainWindow)
 
-	WDdata = DownloadData{Start: &EnvModel{items: make([]string, 0)},Stop: &EnvModel{items: make([]string, 0)}, Thread: 70}
+	WDdata = DownloadData{Start: &EnvModel{items: make([]string, 0)}, Stop: &EnvModel{items: make([]string, 0)}}
 	WDform = WTdown.WTdown{}
 
 	buttonLog = new(walk.PushButton)
@@ -21,11 +21,13 @@ var (
 )
 
 func main() {
+	loadSettingData()
+
 	err = MainWindow{
 		Icon:     "img\\downloader.ico",
 		AssignTo: &mw.MainWindow,
 		Title:    "Jcop Webtoon Downloader",
-		MinSize:  Size{Width:420, Height:140},
+		MinSize:  Size{Width: 420, Height: 140},
 		Layout:   VBox{},
 		MenuItems: []MenuItem{
 			Menu{
@@ -35,16 +37,20 @@ func main() {
 						Text: "Set Data",
 						Items: []MenuItem{
 							Action{
-								Text: "Naver Comic",
+								Text:        "Naver Comic",
 								OnTriggered: setNaverComicCookieData,
 							},
 							Action{
-								Text: "Kakao Page",
+								Text:        "Kakao Page",
 								OnTriggered: setKakaoPageCookieData,
 							},
 							Action{
-								Text: "Lezhin Comics",
+								Text:        "Lezhin Comics",
 								OnTriggered: setLezhinComicCookieData,
+							},
+							Action{
+								Text:        "Ridibooks Webtoon",
+								OnTriggered: setRidibooksWebtoonCookieData,
 							},
 						},
 					},
@@ -53,20 +59,27 @@ func main() {
 						OnTriggered: func() {
 
 							dlg := new(walk.FileDialog)
-
+							// Log(2, errors.New(WDdata.Folder))
+							// dlg.Filter = WDdata.Folder
 							dlg.Title = "Select Folder"
-
 							if ok, err := dlg.ShowBrowseFolder(mw); err != nil {
 								mw.openErrorMessBox("Error", err.Error())
 								return
 							} else if !ok {
 								return
 							}
-							err = setDefaultDir(dlg.FilePath)
+							WDdata.Folder = dlg.FilePath
+							// err = setDefaultDir(dlg.FilePath)
+							err = SaveFormData()
 							if err != nil {
 								mw.openErrorMessBox("Error", err.Error())
 							}
-							WDdata.Folder = dlg.FilePath
+						},
+					},
+					Action{
+						Text: "Set Thread",
+						OnTriggered: func(){
+							setThread(mw)
 						},
 					},
 				},
@@ -151,7 +164,7 @@ func main() {
 											},
 											PushButton{
 												Font:      Font{PointSize: 12},
-												MaxSize:   Size{Width:35, Height:10},
+												MaxSize:   Size{Width: 35, Height: 10},
 												Text:      "🔍",
 												OnClicked: LoadEpis,
 											},
@@ -183,9 +196,8 @@ func main() {
 		log.Println(err)
 	}
 
-	mw.SetBounds(walk.Rectangle{X:0, Y:0, Width:500, Height:140}) // You can use GetSystemMetrics from the `win` package to get the screen resolution
+	mw.SetBounds(walk.Rectangle{X: 0, Y: 0, Width: 600, Height: 240}) // You can use GetSystemMetrics from the `win` package to get the screen resolution
 
-	loadSettingData()
 	NewVersionCheck()
 	mw.Run()
 
@@ -219,5 +231,6 @@ func GetWebtoonTypes() []*WebtoonType {
 		{3, "Daum Webtoon"},
 		{4, "Lezhin Comics"},
 		{5, "Kakao Page Epub"},
+		{6, "Ridibooks Webtoon"},
 	}
 }

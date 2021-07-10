@@ -5,7 +5,7 @@ import (
 )
 
 func TestNaverload(t *testing.T) {
-	nc := &KakaoPage{TitleId: "55479899", Cookies: "_kpawlt=qIrp9ItF_RTcFM37jY6Qd2Hj__0Vb0oSQRTkset1L7tVT_9u4UoVfur5QLlW1ToX-5xvE3FHZ02HSltb-bsyHA1q_C7Ce68Sl5szAQ0w1Z55e_NIVReb9jq5UmAFfHij; _kpawltea=1624649908855; _kpawlst=VFzltox6LWOqBiny9T_xe4huMxj8TodvB_AzUDXDUIYjm0hI8d96M9OveZP4i5TWDKrap3r1CTIbKLM1Hjzeqvoa40Q4srU6H9QYSMhv5e0;"}
+	nc := &KakaoPage{TitleId: "57132358", Cookies: "_kpawlt=''; _kpawltea=''; _kpawlst='';"}
 	err := nc.GetEpiData()
 	if err != nil {
 		t.Log("Failed to load name of episodes")

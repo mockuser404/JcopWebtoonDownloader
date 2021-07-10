@@ -1,6 +1,9 @@
 package main
 
 import (
+	"errors"
+	"strconv"
+
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
 )
@@ -25,7 +28,7 @@ func askCookie(owner walk.Form, cookieType *string, requireCookies []string) (in
 		Title:         "Set Cookie data",
 		DefaultButton: &acceptPB,
 		CancelButton:  &cancelPB,
-		MinSize:       Size{Width:300, Height:200},
+		MinSize:       Size{Width: 300, Height: 200},
 		Layout:        VBox{},
 		Children: []Widget{
 			Composite{
@@ -40,7 +43,7 @@ func askCookie(owner walk.Form, cookieType *string, requireCookies []string) (in
 						AssignTo: &acceptPB,
 						Text:     "OK",
 						OnClicked: func() {
-							*cookieType = "" 
+							*cookieType = ""
 							for i := range requireCookies {
 								*cookieType += requireCookies[i] + "=" + accesstokenLineEdit[i].Text() + "; "
 							}
@@ -59,7 +62,7 @@ func askCookie(owner walk.Form, cookieType *string, requireCookies []string) (in
 	}.Run(owner)
 }
 
-func lezhinRunDialog(owner walk.Form,cookieType *string, requireCookies []string) (int, error) {
+func lezhinRunDialog(owner walk.Form, cookieType *string, requireCookies []string) (int, error) {
 	var dlg *walk.Dialog
 	accesstokenLineEdit := make([]*walk.LineEdit, len(requireCookies)+1)
 	// requireCookies = append(requireCookies, "access_token")
@@ -86,11 +89,11 @@ func lezhinRunDialog(owner walk.Form,cookieType *string, requireCookies []string
 		Title:         "Set Lezhin access token",
 		DefaultButton: &acceptPB,
 		CancelButton:  &cancelPB,
-		MinSize:       Size{Width:300, Height:200},
+		MinSize:       Size{Width: 300, Height: 200},
 		Layout:        VBox{},
 		Children: []Widget{
 			Composite{
-				Layout: Grid{Columns: 2},
+				Layout:   Grid{Columns: 2},
 				Children: eachForm,
 			},
 			Composite{
@@ -101,11 +104,65 @@ func lezhinRunDialog(owner walk.Form,cookieType *string, requireCookies []string
 						AssignTo: &acceptPB,
 						Text:     "OK",
 						OnClicked: func() {
-							*cookieType = "" 
+							*cookieType = ""
 							for i := range requireCookies {
 								*cookieType += requireCookies[i] + "=" + accesstokenLineEdit[i].Text() + "; "
 							}
 							WDform.LezhinComics.AccessToken = accesstokenLineEdit[len(requireCookies)].Text()
+							SaveFormData()
+							dlg.Cancel()
+						},
+					},
+					PushButton{
+						AssignTo:  &cancelPB,
+						Text:      "Cancel",
+						OnClicked: func() { dlg.Cancel() },
+					},
+				},
+			},
+		},
+	}.Run(owner)
+}
+
+func setThread(owner walk.Form) (int, error) {
+	var dlg *walk.Dialog
+	var threadedit *walk.LineEdit
+	var acceptPB, cancelPB *walk.PushButton
+
+	return Dialog{
+		AssignTo:      &dlg,
+		Title:         "Set Cookie data",
+		DefaultButton: &acceptPB,
+		CancelButton:  &cancelPB,
+		MinSize:       Size{Width: 300, Height: 200},
+		Layout:        VBox{},
+		Children: []Widget{
+			Composite{
+				Layout: Grid{Columns: 2},
+				Children: []Widget{
+					Label{
+						Text: "Thread: ",
+					},
+					LineEdit{
+						Text:     strconv.Itoa(WDdata.Thread),
+						AssignTo: &threadedit,
+					},
+				},
+			},
+			Composite{
+				Layout: HBox{},
+				Children: []Widget{
+					HSpacer{},
+					PushButton{
+						AssignTo: &acceptPB,
+						Text:     "OK",
+						OnClicked: func() {
+							threadinNum, err := strconv.Atoi(threadedit.Text())
+							if err != nil {
+								Log(2, errors.New("Invalid num"))
+								return
+							}
+							WDdata.Thread = threadinNum
 							SaveFormData()
 							dlg.Cancel()
 						},

@@ -53,21 +53,21 @@ func LoadEpis() {
 		}
 	case 1:
 		if values.Get("seriesId") != "" {
-
 			WDform.KakaoPage.TitleId = values.Get("seriesId")
-			go func() {
-				LoadingOn()
-				err = WDform.KakaoPage.GetEpiData()
-				if err != nil {
-					Log(2, err)
-				}
-				WDdata.StartControl.SetModel(&EnvModel{items: WDform.KakaoPage.EpisodeName})
-				WDdata.StopControl.SetModel(&EnvModel{items: WDform.KakaoPage.EpisodeName})
-				LoadingOff()
-			}()
 		} else {
-			Log(2, errors.New("Can't find id from URL"))
+			WDform.KakaoPage.TitleId = strings.Split(buff.Path, "/")[len(strings.Split(buff.Path, "/"))-1]
+			// Log(2, errors.New("Can't find id from URL"))
 		}
+		go func() {
+			LoadingOn()
+			err = WDform.KakaoPage.GetEpiData()
+			if err != nil {
+				Log(2, err)
+			}
+			WDdata.StartControl.SetModel(&EnvModel{items: WDform.KakaoPage.EpisodeName})
+			WDdata.StopControl.SetModel(&EnvModel{items: WDform.KakaoPage.EpisodeName})
+			LoadingOff()
+		}()
 	case 2:
 		WDform.DaumWebtoon.TitleId = strings.Split(buff.Path, "/")[len(strings.Split(buff.Path, "/"))-1]
 		go func() {
@@ -94,21 +94,33 @@ func LoadEpis() {
 		}()
 	case 4:
 		if values.Get("seriesId") != "" {
-
 			WDform.KPepub.TitleId = values.Get("seriesId")
-			go func() {
-				LoadingOn()
-				err = WDform.KPepub.GetEpiData()
-				if err != nil {
-					Log(2, err)
-				}
-				WDdata.StartControl.SetModel(&EnvModel{items: WDform.KPepub.EpisodeName})
-				WDdata.StopControl.SetModel(&EnvModel{items: WDform.KPepub.EpisodeName})
-				LoadingOff()
-			}()
 		} else {
-			Log(2, errors.New("Can't find id from URL"))
+			WDform.KPepub.TitleId = strings.Split(buff.Path, "/")[len(strings.Split(buff.Path, "/"))-1]
+			// Log(2, errors.New("Can't find id from URL"))
 		}
+		go func() {
+			LoadingOn()
+			err = WDform.KPepub.GetEpiData()
+			if err != nil {
+				Log(2, err)
+			}
+			WDdata.StartControl.SetModel(&EnvModel{items: WDform.KPepub.EpisodeName})
+			WDdata.StopControl.SetModel(&EnvModel{items: WDform.KPepub.EpisodeName})
+			LoadingOff()
+		}()
+	case 5:
+		WDform.RidiWT.TitleId = strings.Split(buff.Path, "/")[len(strings.Split(buff.Path, "/"))-1]
+		go func() {
+			LoadingOn()
+			err = WDform.RidiWT.GetEpiData()
+			if err != nil {
+				Log(2, err)
+			}
+			WDdata.StartControl.SetModel(&EnvModel{items: WDform.RidiWT.EpisodeName})
+			WDdata.StopControl.SetModel(&EnvModel{items: WDform.RidiWT.EpisodeName})
+			LoadingOff()
+		}()
 	}
 
 	// m := &EnvModel{items: make([]string, 2)}

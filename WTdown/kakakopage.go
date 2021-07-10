@@ -48,7 +48,7 @@ func (kp *KakaoPage) Download(start, stop, thread int, folder string) (int, erro
 		if err != nil {
 			return 1, err
 		}
-		if len(response) <= 0 {
+		if len(*response) <= 0 {
 			return 2, errors.New("Epi" + strconv.Itoa(episode+1) + " - Can't find images")
 		}
 
@@ -59,10 +59,10 @@ func (kp *KakaoPage) Download(start, stop, thread int, folder string) (int, erro
 		// errchan := make(chan error, len(response))
 		gopool := pool.NewGoPool(pool.WithMaxLimit(thread))
 
-		for anchor := range response {
+		for anchor := range *response {
 			func(anchor int) {
 				gopool.Submit(func() {
-					downloadFileSingle(KAKAO_BASE_IMG_URL+response[anchor], folder+"/"+strconv.Itoa(episode+1)+"/"+strconv.Itoa(anchor+1)+".jpg")
+					downloadFileSingle(KAKAO_BASE_IMG_URL+(*response)[anchor], folder+"/"+strconv.Itoa(episode+1)+"/"+strconv.Itoa(anchor+1)+".jpg")
 				})
 			}(anchor)
 			// go downloadFile(KAKAO_BASE_IMG_URL+response[anchor], folder+"/"+strconv.Itoa(episode)+"/"+strconv.Itoa(anchor+1)+".jpg", errchan)
@@ -76,12 +76,12 @@ func (kp *KakaoPage) Download(start, stop, thread int, folder string) (int, erro
 		// 	}
 		// }
 
-		makeHTML(episode+1, len(response), kp.TitleId, folder+"/"+strconv.Itoa(episode+1)+"/"+strconv.Itoa(episode+1)+".html")
+		makeHTML(episode+1, len(*response), kp.TitleId, folder+"/"+strconv.Itoa(episode+1)+"/"+strconv.Itoa(episode+1)+".html")
 	}
 	return 0, nil
 }
 
-func (kp *KakaoPage) getImgURL(productId string) ([]string, error) {
+func (kp *KakaoPage) getImgURL(productId string) (*[]string, error) {
 	data := make(map[string]string)
 	data["productId"] = productId
 
@@ -110,7 +110,7 @@ func (kp *KakaoPage) getImgURL(productId string) ([]string, error) {
 	for i := range outputFiles {
 		output = append(output, outputFiles[i].SecureUrl)
 	}
-	return output, nil
+	return &output, nil
 }
 
 func (kp *KakaoPage) GetEpiData() error {

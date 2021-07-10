@@ -39,7 +39,15 @@ func setLezhinComicCookieData() {
 	requireCookies := make([]string, 2)
 	requireCookies[0] = "RSESSION"
 	requireCookies[1] = "cc"
-	if _, err := lezhinRunDialog(mw,&(WDform.LezhinComics.Cookies),requireCookies); err != nil {
+	if _, err := lezhinRunDialog(mw, &(WDform.LezhinComics.Cookies), requireCookies); err != nil {
+		Log(1, err)
+	}
+}
+
+func setRidibooksWebtoonCookieData() {
+	requireCookies := make([]string, 1)
+	requireCookies[0] = "ridi-at"
+	if _, err := askCookie(mw, &(WDform.RidiWT.Cookies), requireCookies); err != nil {
 		Log(1, err)
 	}
 }
@@ -58,10 +66,10 @@ func loadSettingData() {
 			mw.openErrorMessBox("Error", err.Error())
 		}
 	}
-	err = loadDefaultDir()
-	if err != nil {
-		mw.openErrorMessBox("Error", err.Error())
-	}
+	// err = loadDefaultDir()
+	// if err != nil {
+	// 	mw.openErrorMessBox("Error", err.Error())
+	// }
 
 	err = loadFormData()
 	if err != nil {
@@ -69,48 +77,53 @@ func loadSettingData() {
 	}
 }
 
-func loadDefaultDir() error {
-	defaultDir, err := os.Open(homeDir + appData + "\\DefaultDir")
-	defer defaultDir.Close()
+// func loadDefaultDir() error {
+// 	defaultDir, err := os.Open(homeDir + appData + "\\bgdata.json")
+// 	defer defaultDir.Close()
 
-	if err != nil {
-		mkfile, err := os.Create(homeDir + appData + "\\DefaultDir")
-		defer mkfile.Close()
-		if err != nil {
-			return err
-		}
-		mkfile.WriteString(homeDir + "\\Documents\\Jcop Webtoon Downloader")
-		WDdata.Folder = homeDir + "\\Documents\\Jcop Webtoon Downloader"
-		return nil
-	}
-	dat := make([]byte, 9999)
-	size, err := defaultDir.Read(dat)
+// 	if err != nil {
+// 		mkfile, err := os.Create(homeDir + appData + "\\bgdata.json")
+// 		defer mkfile.Close()
+// 		if err != nil {
+// 			return err
+// 		}
+// 		mkfile.WriteString(homeDir + "\\Documents\\Jcop Webtoon Downloader")
+// 		WDdata.Folder = homeDir + "\\Documents\\Jcop Webtoon Downloader"
+// 		return nil
+// 	}
+// 	dat := make([]byte, 9999)
+// 	size, err := defaultDir.Read(dat)
 
-	if err != nil {
-		return err
-	}
-	WDdata.Folder = string(dat[:size])
-	return nil
-}
+// 	if err != nil {
+// 		return err
+// 	}
 
-func setDefaultDir(path string) error {
-	defaultDir, err := os.Create(homeDir + appData + "\\DefaultDir")
-	defer defaultDir.Close()
-	if err != nil {
-		return err
-	}
-	defaultDir.WriteString(path)
-	return nil
-}
+// 	WDdata.Folder = string(dat[:size])
+// 	return nil
+// }
+
+// func setDefaultDir(path string) error {
+// 	defaultDir, err := os.Create(homeDir + appData + "\\DefaultDir")
+// 	defer defaultDir.Close()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defaultDir.WriteString(path)
+// 	return nil
+// }
 
 type dataForm struct {
+	DefaultDir  string `json:"defaultDir"`
+	Thread      int    `json:"thread"`
 	Naver       string `json:"naver"`
 	Kakao       string `json:"kakao"`
-	Lezhin       string `json:"lezhin"`
+	Lezhin      string `json:"lezhin"`
 	Accesstoken string `json:"accesstoken"`
+	Ridiwt      string `json:"ridiwt"`
 }
 
 func loadFormData() error {
+	var readDataForm dataForm
 	defaultDir, err := os.Open(homeDir + appData + "\\FormData.json")
 	defer defaultDir.Close()
 
@@ -120,34 +133,53 @@ func loadFormData() error {
 		if err != nil {
 			return err
 		}
-		mkfile.WriteString(`{"naver":"","kakao":"","lezhin":"","accesstoken":""}`)
+		readDataForm.DefaultDir = homeDir + "\\Documents\\Jcop Webtoon Downloader"
+		readDataForm.Thread = 70
+		emptyJson, err := json.Marshal(readDataForm)
+		if err != nil {
+			return err
+		}
+		mkfile.WriteString(string(emptyJson))
 		WDdata.Folder = homeDir + "\\Documents\\Jcop Webtoon Downloader"
 		return nil
 	}
-	dat := make([]byte, 9999)
+	dat := make([]byte, 19999)
 	size, err := defaultDir.Read(dat)
 
 	if err != nil {
 		return err
 	}
-	var readDataForm dataForm
 	err = json.Unmarshal(dat[:size], &readDataForm)
 	if err != nil {
 		return nil
 	}
+	WDdata.Folder = readDataForm.DefaultDir
 	WDform.NaverComic.Cookies = readDataForm.Naver
 	WDform.KakaoPage.Cookies = readDataForm.Kakao
 	WDform.LezhinComics.Cookies = readDataForm.Lezhin
 	WDform.LezhinComics.AccessToken = readDataForm.Accesstoken
+	WDform.RidiWT.Cookies = readDataForm.Ridiwt
+	if readDataForm.Thread == 0 {
+		WDdata.Thread = 70
+	} else {
+		WDdata.Thread = readDataForm.Thread
+	}
+	// for i := range readDataForm.Recent {
+
+	// 	*WDdata.Recent = append(*WDdata.Recent, Action{Text:readDataForm.Recent[i],OnTriggered: func(){WDdata.Folder = readDataForm.Recent[i]}})
+	// }
 	return nil
 }
 
 func SaveFormData() error {
 	newFormData := dataForm{
+		DefaultDir:  WDdata.Folder,
+		Thread:      WDdata.Thread,
 		Naver:       WDform.NaverComic.Cookies,
 		Kakao:       WDform.KakaoPage.Cookies,
-		Lezhin:       WDform.LezhinComics.Cookies,
+		Lezhin:      WDform.LezhinComics.Cookies,
 		Accesstoken: WDform.LezhinComics.AccessToken,
+		Ridiwt:      WDform.RidiWT.Cookies,
 	}
 	stringFormData, err := json.Marshal(newFormData)
 	if err != nil {

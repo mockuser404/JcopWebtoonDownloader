@@ -6,4 +6,5 @@ type WTdown struct {
 	DaumWebtoon
 	LezhinComics
 	KPepub
+	RidiWT
 }
