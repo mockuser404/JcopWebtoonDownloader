@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"strconv"
 
@@ -22,7 +21,8 @@ type RidiWT struct {
 
 const (
 	RIDIWT_HOME_URL = "https://ridibooks.com/books/"
-	RIDIWT_IMG_API = "https://view.ridibooks.com/generate/"
+	RIDIWT_IMG_API  = "https://view.ridibooks.com/generate/"
+
 // 	KAKAO_SINGLES_API  = "https://api2-page.kakao.com/api/v5/store/singles"
 // 	KAKAO_IMG_API      = "https://api2-page.kakao.com/api/v1/inven/get_download_data/web"
 // 	KAKAO_BASE_IMG_URL = "http://page-edge-jz.kakao.com/sdownload/resource/"
@@ -103,11 +103,14 @@ func (rd *RidiWT) getImgURL(productId string) (*[]string, error) {
 }
 
 func (rd *RidiWT) GetEpiData() error {
-	resp, err := http.Get(RIDIWT_HOME_URL + rd.TitleId)
+	rd.epis = make([]string, 0)
+	rd.EpisodeName = make([]string, 0)
+
+	resp, err := requestWithCookieNBody(RIDIWT_HOME_URL+rd.TitleId, "GET", make(map[string]string), make(map[string]string))
 	if err != nil {
 		return err
 	}
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	doc, err := goquery.NewDocumentFromReader(resp)
 	if err != nil {
 		return err
 	}

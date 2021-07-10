@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	Version      = "v4.3.1"
+	Version      = "v4.3.2"
 	Architecture = "x64"
 )
 
