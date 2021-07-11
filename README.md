@@ -38,7 +38,7 @@ Kakao Page - https://page.kakao.com/home?seriesId=55832846 \
 3. View source by CTRL+U (in Chrome)
 4. Search "token" text by CTRL+F
 5. If you find source like this \
-![ex6.png](https://raw.githubusercontent.com/mynameispyo/JcopWebtoonDownloader/master/screens/ex6.png) \
+![ex6.png](https://raw.githubusercontent.com/mynameispyo/JcopWebtoonDownloader/master/screens/ex6.PNG) \
 blue lined text would be access_token for Lezhin Comics. 
 
 
