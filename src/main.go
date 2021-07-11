@@ -78,7 +78,7 @@ func main() {
 					},
 					Action{
 						Text: "Set Thread",
-						OnTriggered: func(){
+						OnTriggered: func() {
 							setThread(mw)
 						},
 					},

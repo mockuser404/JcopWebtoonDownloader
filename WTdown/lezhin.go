@@ -15,28 +15,38 @@ import (
 )
 
 type LezhinComics struct {
-	TitleId string
-	Cookies string // _kpawlt _kpawltea _kpawlst
+	TitleId     string
+	Cookies     string // _kpawlt _kpawltea _kpawlst
 	AccessToken string
 
 	epis        []string
 	EpisodeName []string
+
+	Language string
 }
 
 const (
 	LEZHIN_SINGLE_URL   = "https://www.lezhin.com/ko/comic/"
 	LEZHIN_BASE_IMG_API = "https://www.lezhin.com/api/v2/inventory_groups/comic_viewer_k"
 	LEZHIN_BASE_IMG_URL = "https://cdn.lezhin.com/v2"
+
+	LEZHIN_ENG_SINGLE_URL = "https://www.lezhinus.com/en/comic/"
 )
 
 func (lc *LezhinComics) Download(start, stop, thread int, folder string) (int, error) {
 	for episode := start; episode <= stop; episode++ {
 
-		reqHeader := make(map[string]string, 2)
-		reqHeader["x-lz-locale"] = "ko_KR"
+		reqHeader := make(map[string]string, 1)
+		switch lc.Language{
+		case "ko":
+			reqHeader["x-lz-locale"] = "ko_KR"
+		case "en":
+			reqHeader["x-lz-locale"] = "en-US"
+		}
 		if len(lc.epis) < episode {
 			return 2, errors.New("Can't find Epi " + strconv.Itoa(episode+1))
 		}
+
 		resp, err := requestWithCookieNBody(LEZHIN_BASE_IMG_API+"?alias="+lc.TitleId+"&name="+lc.epis[episode]+"&type=comic_episode", "GET", reqHeader, make(map[string]string, 0))
 		if err != nil {
 			return 1, err
@@ -76,12 +86,6 @@ func (lc *LezhinComics) Download(start, stop, thread int, folder string) (int, e
 			}(anchor)
 		}
 		gopool.Wait()
-		// for i := 0; i < len(imgs); i++ {
-		// 	err = <-errchan
-		// 	if err != nil {
-		// 		return 1, err
-		// 	}
-		// }
 
 		makeHTML(episode+1, len(imgs), lc.TitleId, folder+"/"+strconv.Itoa(episode+1)+"/"+strconv.Itoa(episode+1)+".html")
 	}
@@ -92,8 +96,14 @@ func (lc *LezhinComics) GetEpiData() error {
 	lc.epis = make([]string, 0)
 	lc.EpisodeName = make([]string, 0)
 
-	req, err := http.NewRequest("GET", LEZHIN_SINGLE_URL+lc.TitleId, nil)
-	// req, err := http.NewRequest("GET", "https://www.lezhin.com/ko/comic/girlwetwall", nil)
+	var requrl string
+	switch lang:=lc.Language;lang {
+	case "ko":
+		requrl = LEZHIN_SINGLE_URL + lc.TitleId
+	case "en":
+		requrl = LEZHIN_ENG_SINGLE_URL + lc.TitleId
+	}
+	req, err := http.NewRequest("GET", requrl, nil)
 	if err != nil {
 		return err
 	}

@@ -115,6 +115,7 @@ func loadSettingData() {
 type dataForm struct {
 	DefaultDir  string `json:"defaultDir"`
 	Thread      int    `json:"thread"`
+	Lang        string `json:"lang"`
 	Naver       string `json:"naver"`
 	Kakao       string `json:"kakao"`
 	Lezhin      string `json:"lezhin"`
@@ -135,6 +136,7 @@ func loadFormData() error {
 		}
 		readDataForm.DefaultDir = homeDir + "\\Documents\\Jcop Webtoon Downloader"
 		readDataForm.Thread = 70
+		readDataForm.Lang = "ko"
 		emptyJson, err := json.Marshal(readDataForm)
 		if err != nil {
 			return err
@@ -159,15 +161,17 @@ func loadFormData() error {
 	WDform.LezhinComics.Cookies = readDataForm.Lezhin
 	WDform.LezhinComics.AccessToken = readDataForm.Accesstoken
 	WDform.RidiWT.Cookies = readDataForm.Ridiwt
+	if readDataForm.Lang == ""{
+		WDform.LezhinComics.Language = "ko"
+	}else{
+		WDform.LezhinComics.Language = readDataForm.Lang
+	}
 	if readDataForm.Thread == 0 {
 		WDdata.Thread = 70
 	} else {
 		WDdata.Thread = readDataForm.Thread
 	}
-	// for i := range readDataForm.Recent {
 
-	// 	*WDdata.Recent = append(*WDdata.Recent, Action{Text:readDataForm.Recent[i],OnTriggered: func(){WDdata.Folder = readDataForm.Recent[i]}})
-	// }
 	return nil
 }
 
@@ -175,6 +179,7 @@ func SaveFormData() error {
 	newFormData := dataForm{
 		DefaultDir:  WDdata.Folder,
 		Thread:      WDdata.Thread,
+		Lang:        WDform.LezhinComics.Language,
 		Naver:       WDform.NaverComic.Cookies,
 		Kakao:       WDform.KakaoPage.Cookies,
 		Lezhin:      WDform.LezhinComics.Cookies,

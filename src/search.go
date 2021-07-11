@@ -122,10 +122,4 @@ func LoadEpis() {
 			LoadingOff()
 		}()
 	}
-
-	// m := &EnvModel{items: make([]string, 2)}
-	// m.items[0] = "1"
-	// m.items[1] = "3"
-	// WDform.StartControl.SetModel(m)
-	// log.Println(WDform.Start)
 }

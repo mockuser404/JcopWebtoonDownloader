@@ -1,15 +1,13 @@
-# Jcop Webtoon Downloader
----
+# Jcop Webtoon Downloader #
 (c) 2020 Downloader made by Inpyo Lee - [mynameispyo](https://github.com/mynameispyo/JcopWebtoonDownloader)
 
 
 Jcop Webtoon Downloader is the swift and stable downloader for the PC. It support Naver Comic, Daum Webtoon, Kakao Page, Lezhin Comics, and Ridibooks Webtoon. Adult and paid episode also avaliable to download. More information in [here](https://blog.naver.com/the3countrys/222106929101).
 
-## Download & Install
----
+## Download & Install ##
 [Release List](https://github.com/mynameispyo/JcopWebtoonDownloader/releases)
 
-## Usage
+## Usage ##
 1. Select the website of the webtoon that you want to download \
 ![ex3.png](https://raw.githubusercontent.com/mynameispyo/JcopWebtoonDownloader/master/screens/ex3.png)
 2. Copy and paste the URL of the "Home Page" of the webtoon \
@@ -23,9 +21,9 @@ Kakao Page - https://page.kakao.com/home?seriesId=55832846 \
 5. Click the download button
 6. All done!!!
 
-## Menu
+## Menu ##
 1. Setting
-    1. Set Data: Set data that requires authorization. Most of them are data of cookies
+    1. Set Data: Set data that requires authorization. Most of them are data of cookies.
     2. Set Default Directory: Set directory where your download files go
     3. Set Thread
 2. Tool
@@ -34,11 +32,18 @@ Kakao Page - https://page.kakao.com/home?seriesId=55832846 \
     1. Version: Show version of the program
     2. Visit Blog
 
+### Find the access_token for Lezhin Comics ###
+1. Sign in  to Lezhin Comics in web browser
+2. Click any episode
+3. View source by CTRL+U (in Chrome)
+4. Search "token" text by CTRL+F
+5. If you find source like this \
+![ex6.png](https://raw.githubusercontent.com/mynameispyo/JcopWebtoonDownloader/master/screens/ex6.png) \
+blue lined text would be access_token for Lezhin Comics. 
+
 
 ## Screenshot
----
 ![ex1.png](https://raw.githubusercontent.com/mynameispyo/JcopWebtoonDownloader/master/screens/ex1.png)
 
 ## Contact
----
 [mynameispyo](mailto:mynameispyo@gmail.com)

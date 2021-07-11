@@ -65,7 +65,7 @@ func askCookie(owner walk.Form, cookieType *string, requireCookies []string) (in
 func lezhinRunDialog(owner walk.Form, cookieType *string, requireCookies []string) (int, error) {
 	var dlg *walk.Dialog
 	accesstokenLineEdit := make([]*walk.LineEdit, len(requireCookies)+1)
-	// requireCookies = append(requireCookies, "access_token")
+	var languageSelect *walk.ComboBox
 	var acceptPB, cancelPB *walk.PushButton
 
 	var eachForm []Widget
@@ -82,6 +82,18 @@ func lezhinRunDialog(owner walk.Form, cookieType *string, requireCookies []strin
 	})
 	eachForm = append(eachForm, LineEdit{
 		AssignTo: &accesstokenLineEdit[len(requireCookies)],
+	})
+
+	eachForm = append(eachForm, Label{
+		Text: "Language",
+	})
+	eachForm = append(eachForm, ComboBox{
+						
+		Model:    getLezhinLangs(),
+		AssignTo: &(languageSelect),
+
+		BindingMember: "Real",
+		DisplayMember: "Display",
 	})
 
 	return Dialog{
@@ -109,6 +121,7 @@ func lezhinRunDialog(owner walk.Form, cookieType *string, requireCookies []strin
 								*cookieType += requireCookies[i] + "=" + accesstokenLineEdit[i].Text() + "; "
 							}
 							WDform.LezhinComics.AccessToken = accesstokenLineEdit[len(requireCookies)].Text()
+							WDform.LezhinComics.Language = languageSelect.Text()
 							SaveFormData()
 							dlg.Cancel()
 						},
@@ -122,6 +135,18 @@ func lezhinRunDialog(owner walk.Form, cookieType *string, requireCookies []strin
 			},
 		},
 	}.Run(owner)
+}
+
+type LezhinLanguage struct {
+	Real    string
+	Display string
+}
+
+func getLezhinLangs() []*LezhinLanguage {
+	return []*LezhinLanguage{
+		{"ko", "ko"},
+		{"en", "en"},
+	}
 }
 
 func setThread(owner walk.Form) (int, error) {
