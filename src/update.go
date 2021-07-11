@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	Version      = "v4.3.2"
-	Architecture = "x64"
+	Version      = "v4.3.3"
+	Architecture = "x32"
 )
 
 func NewVersionCheck() {

@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Jcop Webtoon Downloader"
-#define MyAppVersion "4.3.2"
+#define MyAppVersion "4.3.3"
 #define MyAppPublisher "mynameispyo"
 #define MyAppURL "https://github.com/mynameispyo/JcopWebtoonDownloader"
 #define MyAppExeName "JcopWebtoonDownloader.exe"
