@@ -1,3 +1,6 @@
+# Important Notice #
+Sorry for all. Releases doesn't support anymore.
+
 # Jcop Webtoon Downloader #
 (c) 2020 Downloader made by Inpyo Lee - [mynameispyo](https://github.com/mynameispyo/JcopWebtoonDownloader)
 
