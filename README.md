@@ -1,8 +1,14 @@
+# Important Notice #
+Sorry for all. Releases doesn't support anymore.
+
 # Jcop Webtoon Downloader #
 (c) 2020 Downloader made by Inpyo Lee - [mynameispyo](https://github.com/mynameispyo/JcopWebtoonDownloader)
 
 
 Jcop Webtoon Downloader is the swift and stable downloader for the PC. It support Naver Comic, Daum Webtoon, Kakao Page, Lezhin Comics, and Ridibooks Webtoon. Adult and paid episode also avaliable to download. More information in [here](https://blog.naver.com/the3countrys/222106929101).
+
+Thanks to 당근토끼 for the find out our security to the user
+https://1412.rest/cboard/722755
 
 ## Download & Install ##
 [Release List](https://github.com/mynameispyo/JcopWebtoonDownloader/releases)
