@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -67,6 +68,7 @@ func (kp *KPepub) getTextURL(productId string) (string, error) {
 
 	header := make(map[string]string)
 	header["Cookie"] = kp.Cookies
+	header["user-agent"] = USER_AGENT
 	header["Content-Type"] = "application/x-www-form-urlencoded"
 
 	resp, err := requestWithCookieNBody(EPUB_VIEWER_API+productId, "GET", header, make(map[string]string))
@@ -94,6 +96,7 @@ func (kp *KPepub) downloadText(epubViewerId, outFile string) error {
 	header := make(map[string]string)
 	header["Cookie"] = kp.Cookies
 	header["Content-Type"] = "application/x-www-form-urlencoded"
+	header["user-agent"] = USER_AGENT
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
@@ -102,6 +105,7 @@ func (kp *KPepub) downloadText(epubViewerId, outFile string) error {
 	if err != nil {
 		return err
 	}
+	log.Println(string(content))
 	start := strings.Index(string(content), "onMainJsonLoaded(") + 17
 	stop := strings.LastIndex(string(content[start:]), ");") - 1
 	// log.Println(string(content[start : start+stop]))
@@ -129,7 +133,7 @@ func (kp *KPepub) GetEpiData() error {
 
 		header := make(map[string]string)
 		header["Content-Type"] = "application/x-www-form-urlencoded"
-
+		header["user-agent"] = USER_AGENT
 		resp, err := requestWithCookieNBody(KAKAO_SINGLES_API, "POST", header, data)
 		if err != nil {
 			return err
@@ -139,7 +143,6 @@ func (kp *KPepub) GetEpiData() error {
 		if err != nil {
 			return err
 		}
-		// log.Println(string(downloadData))
 		type idFormat struct {
 			Id    int    `json:"id"`
 			Title string `json:"title"`
@@ -150,7 +153,6 @@ func (kp *KPepub) GetEpiData() error {
 			return err
 		}
 		json.Unmarshal([]byte(singles), &outputFiles)
-		// log.Println(outputFiles)
 		for i := range outputFiles {
 			kp.epis = append(kp.epis, strconv.Itoa(outputFiles[i].Id))
 			kp.EpisodeName = append(kp.EpisodeName, outputFiles[i].Title)
@@ -160,6 +162,5 @@ func (kp *KPepub) GetEpiData() error {
 		}
 		c += 1
 	}
-	// log.Println(kp.epis)
 	return nil
 }

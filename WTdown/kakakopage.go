@@ -87,6 +87,7 @@ func (kp *KakaoPage) getImgURL(productId string) (*[]string, error) {
 
 	header := make(map[string]string)
 	header["Cookie"] = kp.Cookies
+	header["user-agent"] = USER_AGENT
 	header["Content-Type"] = "application/x-www-form-urlencoded"
 
 	resp, err := requestWithCookieNBody(KAKAO_IMG_API, "POST", header, data)
@@ -124,6 +125,7 @@ func (kp *KakaoPage) GetEpiData() error {
 		data["page"] = strconv.Itoa(c)
 
 		header := make(map[string]string)
+		header["user-agent"] = USER_AGENT
 		header["Content-Type"] = "application/x-www-form-urlencoded"
 
 		resp, err := requestWithCookieNBody(KAKAO_SINGLES_API, "POST", header, data)

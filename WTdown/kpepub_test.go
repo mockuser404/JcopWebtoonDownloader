@@ -5,7 +5,7 @@ import (
 )
 
 func TestEpub(t *testing.T) {
-	nc := &KPepub{TitleId: "57352442", Cookies: ""}
+	nc := &KPepub{TitleId: "57389031", Cookies: ""}
 	err := nc.GetEpiData()
 	if err != nil {
 		t.Log("Failed to load name of episodes")
@@ -16,9 +16,9 @@ func TestEpub(t *testing.T) {
 	// 	t.Log(err)
 	// }
 	// log.Println(epubViewerId)
-	code, err := nc.Download(88, 88, "D:\\Webtoons")
+	_, err = nc.Download(0, 0, "D:\\Webtoons")
 	if err != nil {
-		t.Log(code)
+		t.Log(err)
 	}
 	// for i:=0;i<6;i++{
 	// }

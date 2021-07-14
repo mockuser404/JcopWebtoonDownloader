@@ -18,6 +18,8 @@ var (
 
 	buttonLog = new(walk.PushButton)
 	err       error
+
+	Version = "v5.1.1"
 )
 
 func main() {
@@ -198,7 +200,6 @@ func main() {
 
 	mw.SetBounds(walk.Rectangle{X: 0, Y: 0, Width: 600, Height: 240}) // You can use GetSystemMetrics from the `win` package to get the screen resolution
 
-	NewVersionCheck()
 	mw.Run()
 
 }
